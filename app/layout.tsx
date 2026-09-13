@@ -6,9 +6,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Tribuna Debate — Enquetes e fórum de temas urbanos',
+  title: 'OpinaGov — Painel de Lideranças e Demandas',
   description:
-    'Plataforma comunitária de enquetes e debate sobre temas urbanos e do cotidiano. Participe, opine e acompanhe a opinião da sua cidade.',
+    'Acompanhe a corrida entre lideranças em tempo real, declare seu voto, cobre propostas e participe dos duelos da sua cidade no OpinaGov.',
   generator: 'v0.app',
   icons: {
     icon: [

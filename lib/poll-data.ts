@@ -1,67 +1,194 @@
-export type VoteSide = "sim" | "nao"
+export type Candidate = {
+  id: string
+  name: string
+  role: string
+  party: string
+  photo: string
+  votes: number
+  /** Tailwind color token used for bars and accents, e.g. "emerald" */
+  color: CandidateColor
+  demands: { icon: DemandIcon; label: string }[]
+}
+
+export type CandidateColor = "emerald" | "sky" | "amber" | "violet"
+
+export type DemandIcon =
+  | "health"
+  | "transport"
+  | "money"
+  | "education"
+  | "security"
+  | "housing"
+  | "environment"
+  | "work"
 
 export type Comment = {
   id: string
   author: string
   city: string
-  side: VoteSide
+  candidateId: string
   message: string
 }
 
-export type SecondaryTopic = {
+export type Debate = {
   id: string
   category: string
   title: string
-  simPercent: number
-  totalVotes: number
+  yesVotes: number
+  noVotes: number
 }
+
+/** Fixed color styles per candidate token — avoids dynamic Tailwind class names. */
+export const colorStyles: Record<
+  CandidateColor,
+  { bar: string; text: string; soft: string; ring: string; dot: string; button: string }
+> = {
+  emerald: {
+    bar: "bg-emerald-500",
+    text: "text-emerald-400",
+    soft: "bg-emerald-500/10 text-emerald-300",
+    ring: "ring-emerald-500/40",
+    dot: "bg-emerald-500",
+    button: "bg-emerald-500 hover:bg-emerald-400 text-emerald-950",
+  },
+  sky: {
+    bar: "bg-sky-500",
+    text: "text-sky-400",
+    soft: "bg-sky-500/10 text-sky-300",
+    ring: "ring-sky-500/40",
+    dot: "bg-sky-500",
+    button: "bg-sky-500 hover:bg-sky-400 text-sky-950",
+  },
+  amber: {
+    bar: "bg-amber-500",
+    text: "text-amber-400",
+    soft: "bg-amber-500/10 text-amber-300",
+    ring: "ring-amber-500/40",
+    dot: "bg-amber-500",
+    button: "bg-amber-500 hover:bg-amber-400 text-amber-950",
+  },
+  violet: {
+    bar: "bg-violet-500",
+    text: "text-violet-400",
+    soft: "bg-violet-500/10 text-violet-300",
+    ring: "ring-violet-500/40",
+    dot: "bg-violet-500",
+    button: "bg-violet-500 hover:bg-violet-400 text-violet-950",
+  },
+}
+
+export const initialCandidates: Candidate[] = [
+  {
+    id: "cand-1",
+    name: "Helena Marques",
+    role: "Prefeitura Municipal",
+    party: "MDR · 15",
+    photo: "/candidates/candidate-1.png",
+    votes: 18520,
+    color: "emerald",
+    demands: [
+      { icon: "health", label: "Saúde integrada 24h" },
+      { icon: "transport", label: "Transporte gratuito" },
+      { icon: "education", label: "Creche em tempo integral" },
+    ],
+  },
+  {
+    id: "cand-2",
+    name: "Paulo Rezende",
+    role: "Prefeitura Municipal",
+    party: "PSC · 40",
+    photo: "/candidates/candidate-2.png",
+    votes: 15340,
+    color: "sky",
+    demands: [
+      { icon: "money", label: "Redução de taxas" },
+      { icon: "work", label: "Apoio ao pequeno negócio" },
+      { icon: "security", label: "Guarda municipal ampliada" },
+    ],
+  },
+  {
+    id: "cand-3",
+    name: "Diego Antunes",
+    role: "Prefeitura Municipal",
+    party: "REDE · 18",
+    photo: "/candidates/candidate-3.png",
+    votes: 12760,
+    color: "amber",
+    demands: [
+      { icon: "environment", label: "Cidade mais verde" },
+      { icon: "transport", label: "Ciclovias conectadas" },
+      { icon: "housing", label: "Moradia popular" },
+    ],
+  },
+  {
+    id: "cand-4",
+    name: "Renata Villas",
+    role: "Prefeitura Municipal",
+    party: "PDT · 12",
+    photo: "/candidates/candidate-4.png",
+    votes: 9880,
+    color: "violet",
+    demands: [
+      { icon: "education", label: "Escola em tempo integral" },
+      { icon: "health", label: "Postos de bairro" },
+      { icon: "work", label: "Qualificação profissional" },
+    ],
+  },
+]
 
 export const initialComments: Comment[] = [
   {
     id: "c1",
     author: "Marina Alves",
     city: "Porto Alegre, RS",
-    side: "sim",
+    candidateId: "cand-1",
     message:
-      "A flexibilização pode gerar mais vagas de meio período para estudantes. Desde que os direitos sejam preservados, sou a favor.",
+      "Espero que a promessa de saúde 24h saia do papel. Vou cobrar isso durante todo o mandato.",
   },
   {
     id: "c2",
     author: "Ricardo Nunes",
     city: "Campinas, SP",
-    side: "nao",
+    candidateId: "cand-2",
     message:
-      "Flexibilizar sem garantias vira porta para abuso. Precisamos de regras claras antes de mudar a jornada.",
+      "Redução de taxas ajuda quem empreende. Mas quero ver plano concreto para o comércio de rua.",
   },
   {
     id: "c3",
     author: "Juliana Prado",
     city: "Fortaleza, CE",
-    side: "sim",
-    message: "No comércio local a demanda varia muito. Ter mais liberdade ajuda os pequenos negócios a sobreviverem.",
+    candidateId: "cand-3",
+    message: "Ciclovias conectadas de verdade mudam a cidade. Conta com o meu apoio e a minha cobrança.",
   },
   {
     id: "c4",
     author: "Eduardo Lima",
     city: "Curitiba, PR",
-    side: "nao",
-    message: "Trabalho no varejo há 12 anos. Jornada flexível na prática costuma sobrecarregar quem já ganha pouco.",
+    candidateId: "cand-1",
+    message: "Creche em tempo integral é o que a periferia mais precisa. Fico de olho no cronograma.",
   },
 ]
 
-export const secondaryTopics: SecondaryTopic[] = [
+export const initialDebates: Debate[] = [
   {
-    id: "t1",
+    id: "d1",
     category: "Mobilidade Urbana",
-    title: "Ampliação da malha de ciclovias no centro da cidade",
-    simPercent: 68,
-    totalVotes: 4213,
+    title: "Ampliar a malha de ciclovias no centro da cidade?",
+    yesVotes: 4213,
+    noVotes: 1980,
   },
   {
-    id: "t2",
+    id: "d2",
     category: "Comércio e Cidade",
-    title: "Funcionamento do comércio de rua aos domingos",
-    simPercent: 42,
-    totalVotes: 3187,
+    title: "Liberar o comércio de rua aos domingos?",
+    yesVotes: 3187,
+    noVotes: 4402,
+  },
+  {
+    id: "d3",
+    category: "Segurança Pública",
+    title: "Instalar câmeras inteligentes nas praças?",
+    yesVotes: 5890,
+    noVotes: 1240,
   },
 ]

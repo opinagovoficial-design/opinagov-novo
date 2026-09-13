@@ -2,34 +2,40 @@
 
 import { useState } from "react"
 import { SiteHeader } from "@/components/site-header"
-import { FeaturedPoll } from "@/components/featured-poll"
+import { LeadershipPanel } from "@/components/leadership-panel"
 import { VoteModal } from "@/components/vote-modal"
 import { CommunityWall } from "@/components/community-wall"
-import { SecondaryTopics } from "@/components/secondary-topics"
-import { initialComments, secondaryTopics, type Comment, type VoteSide } from "@/lib/poll-data"
+import { DebatesSection } from "@/components/debates-section"
+import {
+  initialCandidates,
+  initialComments,
+  initialDebates,
+  type Candidate,
+  type Comment,
+  type Debate,
+} from "@/lib/poll-data"
 
 export default function Page() {
-  const [simVotes, setSimVotes] = useState(8420)
-  const [naoVotes, setNaoVotes] = useState(6190)
+  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates)
   const [comments, setComments] = useState<Comment[]>(initialComments)
-  const [activeSide, setActiveSide] = useState<VoteSide | null>(null)
+  const [debates, setDebates] = useState<Debate[]>(initialDebates)
+  const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(null)
 
-  const handleConfirm = (data: {
-    name: string
-    city: string
-    message: string
-    side: VoteSide
-  }) => {
-    if (data.side === "sim") setSimVotes((v) => v + 1)
-    else setNaoVotes((v) => v + 1)
+  const handleConfirm = (data: { name: string; message: string }) => {
+    if (!activeCandidate) return
+    const candidateId = activeCandidate.id
+
+    setCandidates((prev) =>
+      prev.map((c) => (c.id === candidateId ? { ...c, votes: c.votes + 1 } : c)),
+    )
 
     if (data.message) {
       setComments((prev) => [
         {
           id: `c-${Date.now()}`,
           author: data.name,
-          city: data.city,
-          side: data.side,
+          city: "Sua cidade",
+          candidateId,
           message: data.message,
         },
         ...prev,
@@ -37,27 +43,45 @@ export default function Page() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <SiteHeader onCreatePoll={() => setActiveSide("sim")} />
+  const handleDebateVote = (debateId: string, side: "yes" | "no") => {
+    setDebates((prev) =>
+      prev.map((d) =>
+        d.id === debateId
+          ? {
+              ...d,
+              yesVotes: side === "yes" ? d.yesVotes + 1 : d.yesVotes,
+              noVotes: side === "no" ? d.noVotes + 1 : d.noVotes,
+            }
+          : d,
+      ),
+    )
+  }
 
-      <main className="mx-auto flex max-w-5xl flex-col gap-10 px-4 py-8 sm:px-6 sm:py-10">
-        <FeaturedPoll simVotes={simVotes} naoVotes={naoVotes} onVote={setActiveSide} />
-        <CommunityWall comments={comments} />
-        <SecondaryTopics topics={secondaryTopics} />
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <SiteHeader onCreate={() => setActiveCandidate(candidates[0])} />
+
+      <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
+        <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
+        <DebatesSection
+          debates={debates}
+          onCreate={() => setActiveCandidate(candidates[0])}
+          onVote={handleDebateVote}
+        />
+        <CommunityWall comments={comments} candidates={candidates} />
       </main>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-5xl px-4 py-6 text-center text-xs text-slate-400 sm:px-6">
-          Tribuna Debate — plataforma comunitária de enquetes. Demonstração sem processamento de
-          pagamento real.
+      <footer className="border-t border-white/10">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
+          OpinaGov — Painel de Lideranças e Demandas. Demonstração sem processamento de pagamento
+          real.
         </div>
       </footer>
 
-      {activeSide && (
+      {activeCandidate && (
         <VoteModal
-          side={activeSide}
-          onClose={() => setActiveSide(null)}
+          candidate={activeCandidate}
+          onClose={() => setActiveCandidate(null)}
           onConfirm={handleConfirm}
         />
       )}

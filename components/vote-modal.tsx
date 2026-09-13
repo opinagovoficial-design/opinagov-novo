@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Check, Copy, Share2, X } from "lucide-react"
+import Image from "next/image"
+import { BadgeCheck, Check, Copy, Share2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FakeQrCode } from "@/components/fake-qr-code"
-import type { VoteSide } from "@/lib/poll-data"
+import { colorStyles, type Candidate } from "@/lib/poll-data"
 
 type Step = "form" | "payment" | "success"
 
@@ -24,25 +25,32 @@ function formatTime(seconds: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
 }
 
+function maskCpf(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11)
+  return digits
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4")
+}
+
 export function VoteModal({
-  side,
+  candidate,
   onClose,
   onConfirm,
 }: {
-  side: VoteSide
+  candidate: Candidate
   onClose: () => void
-  onConfirm: (data: { name: string; city: string; message: string; side: VoteSide }) => void
+  onConfirm: (data: { name: string; message: string }) => void
 }) {
   const [step, setStep] = useState<Step>("form")
   const [name, setName] = useState("")
-  const [document, setDocument] = useState("")
+  const [cpf, setCpf] = useState("")
   const [message, setMessage] = useState("")
   const [copied, setCopied] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(600)
 
   const paymentKey = useMemo(() => generateKey(), [])
-  const isSim = side === "sim"
-  const accent = isSim ? "emerald" : "red"
+  const c = colorStyles[candidate.color]
 
   useEffect(() => {
     if (step !== "payment") return
@@ -75,111 +83,115 @@ export function VoteModal({
   }
 
   const handleConfirmPayment = () => {
-    onConfirm({ name: name.trim() || "Anônimo", city: "Sua cidade", message: message.trim(), side })
+    onConfirm({ name: name.trim() || "Anônimo", message: message.trim() })
     setStep("success")
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Confirmar participação no tópico"
-        className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:rounded-2xl"
+        aria-label={`Declarar voto em ${candidate.name}`}
+        className="relative flex max-h-[92vh] w-full max-w-md flex-col overflow-y-auto rounded-t-2xl border border-white/10 bg-slate-900 shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
           aria-label="Fechar"
-          className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          className="absolute right-3 top-3 z-10 flex size-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
         >
           <X className="size-4" aria-hidden="true" />
         </button>
 
-        {step === "form" && (
-          <form onSubmit={handleSubmitForm} className="flex flex-col gap-4 p-5 sm:p-6">
-            <div className="pr-8">
-              <span
-                className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${
-                  isSim ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"
-                }`}
-              >
-                Opinião: {isSim ? "A favor" : "Contra"}
-              </span>
-              <h2 className="mt-2 text-lg font-semibold text-slate-900">
-                Confirmar participação no tópico
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Preencha seus dados para validar sua participação única.
-              </p>
-            </div>
+        <div className="flex items-center gap-3 border-b border-white/10 bg-white/5 p-5">
+          <div className={`relative size-14 shrink-0 overflow-hidden rounded-full ring-2 ${c.ring}`}>
+            <Image
+              src={candidate.photo || "/placeholder.svg"}
+              alt={`Foto de ${candidate.name}`}
+              fill
+              sizes="56px"
+              className="object-cover"
+            />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-slate-400">Declarando voto em</p>
+            <h2 className="truncate text-lg font-semibold text-white">{candidate.name}</h2>
+            <span className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${c.soft}`}>
+              {candidate.party}
+            </span>
+          </div>
+        </div>
 
+        {step === "form" && (
+          <form onSubmit={handleSubmitForm} className="flex flex-col gap-4 p-5">
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-slate-700">Nome do participante</span>
+              <span className="font-medium text-slate-300">Nome completo</span>
               <input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome completo"
-                className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none transition-colors focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                className="h-10 rounded-lg border border-white/10 bg-slate-950/50 px-3 text-white placeholder:text-slate-500 outline-none transition-colors focus:border-white/30 focus:ring-2 focus:ring-white/10"
               />
             </label>
 
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-slate-700">Documento de identificação</span>
+              <span className="font-medium text-slate-300">CPF</span>
               <input
                 required
-                value={document}
-                onChange={(e) => setDocument(e.target.value)}
-                placeholder="Ex.: RG ou CPF"
-                className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-slate-900 outline-none transition-colors focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                inputMode="numeric"
+                value={cpf}
+                onChange={(e) => setCpf(maskCpf(e.target.value))}
+                placeholder="000.000.000-00"
+                className="h-10 rounded-lg border border-white/10 bg-slate-950/50 px-3 text-white placeholder:text-slate-500 outline-none transition-colors focus:border-white/30 focus:ring-2 focus:ring-white/10"
               />
             </label>
 
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium text-slate-700">
-                Mensagem para o mural <span className="font-normal text-slate-400">(opcional)</span>
+              <span className="font-medium text-slate-300">
+                Cobrança ou apoio público{" "}
+                <span className="font-normal text-slate-500">(opcional)</span>
               </span>
               <textarea
                 value={message}
                 maxLength={280}
                 rows={3}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Deixe sua opinião para a comunidade"
-                className="resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 outline-none transition-colors focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                placeholder={`Deixe um recado público para ${candidate.name.split(" ")[0]}`}
+                className="resize-none rounded-lg border border-white/10 bg-slate-950/50 px-3 py-2 text-white placeholder:text-slate-500 outline-none transition-colors focus:border-white/30 focus:ring-2 focus:ring-white/10"
               />
-              <span className="text-right text-xs text-slate-400">{message.length}/280</span>
+              <span className="text-right text-xs text-slate-500">{message.length}/280</span>
             </label>
 
-            <Button
-              type="submit"
-              className={`h-11 w-full rounded-xl text-white ${
-                isSim ? "bg-emerald-500 hover:bg-emerald-600" : "bg-red-500 hover:bg-red-600"
-              }`}
-            >
-              Prosseguir para validação digital
+            <Button type="submit" className={`h-11 w-full rounded-xl font-semibold ${c.button}`}>
+              Ir para pagamento Pix — R$ 1,00
             </Button>
           </form>
         )}
 
         {step === "payment" && (
-          <div className="flex flex-col items-center gap-4 p-5 text-center sm:p-6">
-            <div className="pr-8">
-              <h2 className="text-lg font-semibold text-slate-900">Validação digital</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Escaneie o QR Code de simulação ou copie a chave abaixo.
+          <div className="flex flex-col items-center gap-4 p-5 text-center">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Pagamento Pix</h3>
+              <p className="mt-1 text-sm text-slate-400">
+                Escaneie o QR Code de simulação ou copie o código Pix.
               </p>
             </div>
 
-            <FakeQrCode seed={paymentKey} />
+            <div className="rounded-2xl bg-white p-3">
+              <FakeQrCode seed={paymentKey} />
+            </div>
 
             <div className="w-full">
-              <p className="mb-1.5 text-left text-xs font-medium text-slate-500">Chave de validação</p>
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
-                <code className="flex-1 truncate px-1 text-left text-xs text-slate-700">
+              <p className="mb-1.5 text-left text-xs font-medium text-slate-400">
+                Pix copia e cola
+              </p>
+              <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-slate-950/50 p-2">
+                <code className="flex-1 truncate px-1 text-left text-xs text-slate-300">
                   {paymentKey}
                 </code>
                 <Button
@@ -187,25 +199,25 @@ export function VoteModal({
                   onClick={handleCopy}
                   size="sm"
                   variant="outline"
-                  className="shrink-0 border-slate-200"
+                  className="shrink-0 border-white/15 bg-transparent text-white hover:bg-white/10"
                 >
                   {copied ? (
                     <>
-                      <Check className="size-3.5 text-emerald-600" aria-hidden="true" />
+                      <Check className="size-3.5 text-emerald-400" aria-hidden="true" />
                       Copiado
                     </>
                   ) : (
                     <>
                       <Copy className="size-3.5" aria-hidden="true" />
-                      Copiar código
+                      Copiar
                     </>
                   )}
                 </Button>
               </div>
             </div>
 
-            <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white">
-              <span className="text-slate-300">Expira em</span>
+            <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm font-medium text-white">
+              <span className="text-slate-400">Expira em</span>
               <span className="tabular-nums">{formatTime(secondsLeft)}</span>
             </div>
 
@@ -213,33 +225,31 @@ export function VoteModal({
               type="button"
               onClick={handleConfirmPayment}
               disabled={secondsLeft === 0}
-              className={`h-11 w-full rounded-xl text-white ${
-                isSim ? "bg-emerald-500 hover:bg-emerald-600" : "bg-red-500 hover:bg-red-600"
-              }`}
+              className={`h-11 w-full rounded-xl font-semibold ${c.button}`}
             >
-              Já validei minha participação
+              Já paguei — confirmar voto
             </Button>
-            <p className="text-xs text-slate-400">
-              Demonstração — nenhum valor é cobrado. Clique acima para simular a confirmação.
+            <p className="text-xs text-slate-500">
+              Demonstração — nenhum valor é cobrado e o Pix não é real.
             </p>
           </div>
         )}
 
         {step === "success" && (
           <div className="flex flex-col items-center gap-4 p-6 text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-emerald-50">
-              <Check className="size-7 text-emerald-600" aria-hidden="true" />
+            <span className="flex size-14 items-center justify-center rounded-full bg-emerald-500/15">
+              <BadgeCheck className="size-7 text-emerald-400" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Participação confirmada!</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Seu voto <strong>{isSim ? "SIM" : "NÃO"}</strong> foi registrado e sua mensagem
-                publicada no mural comunitário.
+              <h3 className="text-lg font-semibold text-white">Voto confirmado!</h3>
+              <p className="mt-1 text-sm text-slate-400">
+                Seu voto em <strong className="text-white">{candidate.name}</strong> foi registrado
+                {message.trim() ? " e seu recado publicado no mural." : "."}
               </p>
             </div>
 
             {message.trim() && (
-              <blockquote className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-left text-sm text-slate-600">
+              <blockquote className="w-full rounded-lg border border-white/10 bg-slate-950/50 p-3 text-left text-sm text-slate-300">
                 {message.trim()}
               </blockquote>
             )}
@@ -248,7 +258,7 @@ export function VoteModal({
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 flex-1 rounded-xl border-slate-200"
+                className="h-11 flex-1 rounded-xl border-white/15 bg-transparent text-white hover:bg-white/10"
                 onClick={() => {
                   navigator.clipboard?.writeText(
                     typeof window !== "undefined" ? window.location.href : "",
@@ -256,12 +266,12 @@ export function VoteModal({
                 }}
               >
                 <Share2 className="size-4" aria-hidden="true" />
-                Compartilhar link
+                Compartilhar
               </Button>
               <Button
                 type="button"
                 onClick={onClose}
-                className="h-11 flex-1 rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+                className="h-11 flex-1 rounded-xl bg-white text-slate-950 hover:bg-slate-200"
               >
                 Concluir
               </Button>
