@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { Plus } from "lucide-react"
+import { SplashReveal } from "@/components/splash-reveal"
+import { LiveTicker } from "@/components/live-ticker"
 import { SiteHeader } from "@/components/site-header"
 import { LeadershipPanel } from "@/components/leadership-panel"
 import { VoteModal } from "@/components/vote-modal"
@@ -58,25 +61,50 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <SiteHeader onCreate={() => setActiveCandidate(candidates[0])} />
+    <div className="relative min-h-screen bg-[#030712] text-white">
+      <SplashReveal />
 
-      <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
-        <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
-        <DebatesSection
-          debates={debates}
-          onCreate={() => setActiveCandidate(candidates[0])}
-          onVote={handleDebateVote}
-        />
-        <CommunityWall comments={comments} candidates={candidates} />
-      </main>
+      <div
+        className="pointer-events-none fixed inset-0 opacity-60"
+        style={{
+          backgroundImage:
+            "radial-gradient(50% 40% at 15% 0%, rgba(16,185,129,0.10), transparent 60%), radial-gradient(50% 40% at 85% 5%, rgba(56,189,248,0.10), transparent 60%)",
+        }}
+        aria-hidden="true"
+      />
 
-      <footer className="border-t border-white/10">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
-          OpinaGov — Painel de Lideranças e Demandas. Demonstração sem processamento de pagamento
-          real.
-        </div>
-      </footer>
+      <div className="og-app-in relative">
+        <LiveTicker />
+        <SiteHeader onCreate={() => setActiveCandidate(candidates[0])} />
+
+        <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
+          <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
+          <DebatesSection
+            debates={debates}
+            onCreate={() => setActiveCandidate(candidates[0])}
+            onVote={handleDebateVote}
+          />
+          <CommunityWall comments={comments} candidates={candidates} />
+        </main>
+
+        <footer className="border-t border-white/10">
+          <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
+            OpinaGov — Painel Oficial de Lideranças. Demonstração sem processamento de pagamento
+            real.
+          </div>
+        </footer>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => setActiveCandidate(candidates[0])}
+        className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-slate-950/80 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-emerald-500/10 backdrop-blur-xl transition-all hover:border-emerald-400/40 hover:bg-slate-900/90"
+      >
+        <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-slate-950">
+          <Plus className="size-4" aria-hidden="true" />
+        </span>
+        Iniciar Nova Consulta Cívica
+      </button>
 
       {activeCandidate && (
         <VoteModal
