@@ -1,34 +1,27 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    // 1. Aqui você pode fazer um fetch para a URL do CSV/JSON oficial do TSE
-    // Exemplo: const res = await fetch('URL_DIRETA_DO_CSV_DO_TSE');
-    // const dadosBrutos = await res.text();
+    const body = await request.json();
 
-    // 2. Processar os registros (separar por linhas/colunas se for CSV)
-    // const candidatosMapeados = processarCsvDoTse(dadosBrutos);
+    // A Efí envia os eventos de webhook dentro de um array 'pix' ou notificação direta
+    const pixEvents = body.pix || [];
 
-    // 3. Inserir ou atualizar no Supabase de forma otimizada (Upsert)
-    /*
-    const { error } = await supabase
-      .from('candidatos')
-      .upsert(candidatosMapeados, { onConflict: 'numero_candidato' });
+    for (const pix of pixEvents) {
+      const txid = pix.txid;
+      const valor = pix.valor;
 
-    if (error) throw error;
-    */
+      // Aqui o webhook identifica que o Pix foi pago com sucesso
+      console.log(`Pix pago com sucesso! TXID: ${txid}, Valor: R$ ${valor}`);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Sincronização com os dados do TSE realizada com sucesso!' 
-    });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+      // 1. Busque no seu banco de dados a cobrança vinculada a este 'txid'.
+      // 2. Se a cobrança tiver um 'refCode' (quem indicou), some +1 ponto para essa liderança.
+      // 3. Atualize o status do apoio do cidadão para 'pago' / confirmado.
+    }
+
+    return NextResponse.json({ success: true, message: "Webhook processado com sucesso" });
+  } catch (error: any) {
+    console.error("Erro ao processar webhook da Efí:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
