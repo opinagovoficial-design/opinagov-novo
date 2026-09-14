@@ -1,5 +1,5 @@
 'use client';
-
+import ShareReferralCard from "@/components/ShareReferralCard";
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -89,7 +89,12 @@ export default function AdminPage() {
             <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Total de Debates Ativos</p>
             <h3 className="text-3xl font-bold text-blue-400">{debates.length} salas</h3>
           </div>
-        </div>
+        </div><div className="mb-6">
+  <ShareReferralCard 
+    userRefCode="cidadao_123" 
+    candidatoNome="OpinaGov" 
+  />
+</div>
 
         {/* Gerenciamento de Debates */}
         <div className="bg-[#0f172a] border border-slate-800 rounded-2xl p-6">
