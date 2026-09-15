@@ -33,7 +33,7 @@ export function SecondaryTopics({ topics }: { topics: SecondaryTopic[] }) {
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-medium text-emerald-600">SIM {t.simPercent}%</span>
                   <span className="text-slate-400">
-                    {t.totalVotes.toLocaleString("pt-BR")} votos
+                   {t.totalVotes.toLocaleString("pt-BR")} votos
                   </span>
                   <span className="font-medium text-red-500">NÃO {naoPercent}%</span>
                 </div>

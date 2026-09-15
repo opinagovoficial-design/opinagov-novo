@@ -1,13 +1,24 @@
-﻿export interface Candidate {
+﻿export type DemandIcon = string;
+export type VoteSide = "yes" | "no" | "sim" | "nao";
+
+export interface CandidateDemand {
+  label: string;
+  icon: DemandIcon;
+}
+
+export interface Candidate {
   id: string;
   name: string;
   party: string;
   partyNumber: number;
   role: string;
-  avatar: string;
+  photo: string;
+  avatar?: string;
   votes: number;
   percentage: number;
-  proposals: string[];
+  color: string;
+  demands: CandidateDemand[];
+  proposals?: string[];
 }
 
 export interface Comment {
@@ -16,7 +27,7 @@ export interface Comment {
   city: string;
   candidateId: string;
   message: string;
-  timestamp: string;
+  timestamp?: string;
 }
 
 export interface Debate {
@@ -25,21 +36,104 @@ export interface Debate {
   category: string;
   replies: number;
   trending: boolean;
+  yesVotes: number;
+  noVotes: number;
 }
 
-export const colorStyles: Record<string, { bg: string; text: string; border: string; bar: string }> = {
-  PT: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", bar: "bg-red-500" },
-  Republicanos: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", bar: "bg-blue-500" },
-  "União Brasil": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20", bar: "bg-cyan-500" },
-  MDB: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", bar: "bg-emerald-500" },
-  NOVO: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", bar: "bg-orange-500" },
-  PDT: { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20", bar: "bg-rose-500" },
-  PSD: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20", bar: "bg-yellow-500" },
-  PSDB: { bg: "bg-sky-500/10", text: "text-sky-400", border: "border-sky-500/20", bar: "bg-sky-500" },
-  PRTB: { bg: "bg-lime-500/10", text: "text-lime-400", border: "border-lime-500/20", bar: "bg-lime-500" },
-  Cidadania: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20", bar: "bg-pink-500" },
-  REDE: { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20", bar: "bg-teal-500" },
-  PSOL: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", bar: "bg-purple-500" },
+export interface SecondaryTopic {
+  id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  yesVotes: number;
+  noVotes: number;
+  totalVotes: number;
+  simPercent: number;
+  naoPercent?: number;
+  percentage?: number;
+}
+
+export const colorStyles: Record<string, { bg: string; text: string; border: string; bar: string; ring: string; soft: string; button: string; dot: string }> = {
+  emerald: {
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-400",
+    border: "border-emerald-500/30",
+    bar: "bg-emerald-500",
+    ring: "ring-emerald-500/40",
+    soft: "bg-emerald-500/20 text-emerald-300",
+    button: "bg-emerald-500 hover:bg-emerald-400 text-slate-950",
+    dot: "bg-emerald-400"
+  },
+  sky: {
+    bg: "bg-sky-500/10",
+    text: "text-sky-400",
+    border: "border-sky-500/30",
+    bar: "bg-sky-500",
+    ring: "ring-sky-500/40",
+    soft: "bg-sky-500/20 text-sky-300",
+    button: "bg-sky-500 hover:bg-sky-400 text-slate-950",
+    dot: "bg-sky-400"
+  },
+  amber: {
+    bg: "bg-amber-500/10",
+    text: "text-amber-400",
+    border: "border-amber-500/30",
+    bar: "bg-amber-500",
+    ring: "ring-amber-500/40",
+    soft: "bg-amber-500/20 text-amber-300",
+    button: "bg-amber-500 hover:bg-amber-400 text-slate-950",
+    dot: "bg-amber-400"
+  },
+  purple: {
+    bg: "bg-purple-500/10",
+    text: "text-purple-400",
+    border: "border-purple-500/30",
+    bar: "bg-purple-500",
+    ring: "ring-purple-500/40",
+    soft: "bg-purple-500/20 text-purple-300",
+    button: "bg-purple-500 hover:bg-purple-400 text-slate-950",
+    dot: "bg-purple-400"
+  },
+  rose: {
+    bg: "bg-rose-500/10",
+    text: "text-rose-400",
+    border: "border-rose-500/30",
+    bar: "bg-rose-500",
+    ring: "ring-rose-500/40",
+    soft: "bg-rose-500/20 text-rose-300",
+    button: "bg-rose-500 hover:bg-rose-400 text-slate-950",
+    dot: "bg-rose-400"
+  },
+  cyan: {
+    bg: "bg-cyan-500/10",
+    text: "text-cyan-400",
+    border: "border-cyan-500/30",
+    bar: "bg-cyan-500",
+    ring: "ring-cyan-500/40",
+    soft: "bg-cyan-500/20 text-cyan-300",
+    button: "bg-cyan-500 hover:bg-cyan-400 text-slate-950",
+    dot: "bg-cyan-400"
+  },
+  indigo: {
+    bg: "bg-indigo-500/10",
+    text: "text-indigo-400",
+    border: "border-indigo-500/30",
+    bar: "bg-indigo-500",
+    ring: "ring-indigo-500/40",
+    soft: "bg-indigo-500/20 text-indigo-300",
+    button: "bg-indigo-500 hover:bg-indigo-400 text-slate-950",
+    dot: "bg-indigo-400"
+  },
+  lime: {
+    bg: "bg-lime-500/10",
+    text: "text-lime-400",
+    border: "border-lime-500/30",
+    bar: "bg-lime-500",
+    ring: "ring-lime-500/40",
+    soft: "bg-lime-500/20 text-lime-300",
+    button: "bg-lime-500 hover:bg-lime-400 text-slate-950",
+    dot: "bg-lime-400"
+  }
 };
 
 export const initialCandidates: Candidate[] = [
@@ -49,10 +143,15 @@ export const initialCandidates: Candidate[] = [
     party: "PT",
     partyNumber: 13,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
     votes: 15840,
     percentage: 28,
-    proposals: ["Fortalecimento de programas sociais", "Transição ecológica", "Reforma tributária progressiva"]
+    color: "emerald",
+    demands: [
+      { label: "Programas Sociais", icon: "heart" },
+      { label: "Transição Verde", icon: "leaf" },
+      { label: "Reforma Tributária", icon: "landmark" }
+    ]
   },
   {
     id: "tarcisio",
@@ -60,10 +159,15 @@ export const initialCandidates: Candidate[] = [
     party: "Republicanos",
     partyNumber: 10,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     votes: 15120,
     percentage: 27,
-    proposals: ["Privatizações e concessões", "Segurança pública ostensiva", "Atração de investimentos externos"]
+    color: "sky",
+    demands: [
+      { label: "Infraestrutura", icon: "zap" },
+      { label: "Segurança Pública", icon: "shield" },
+      { label: "Privatizações", icon: "briefcase" }
+    ]
   },
   {
     id: "ronaldo",
@@ -71,10 +175,15 @@ export const initialCandidates: Candidate[] = [
     party: "União Brasil",
     partyNumber: 44,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
     votes: 12900,
     percentage: 23,
-    proposals: ["Tolerância zero ao crime", "Valorização do agronegócio", "Eficiência administrativa"]
+    color: "amber",
+    demands: [
+      { label: "Tolerância Zero", icon: "shield" },
+      { label: "Agronegócio Forte", icon: "leaf" },
+      { label: "Gestão Fiscal", icon: "landmark" }
+    ]
   },
   {
     id: "simone",
@@ -82,10 +191,15 @@ export const initialCandidates: Candidate[] = [
     party: "MDB",
     partyNumber: 15,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
     votes: 12340,
     percentage: 22,
-    proposals: ["Planejamento fiscal de longo prazo", "Educação em tempo integral", "Igualdade salarial"]
+    color: "purple",
+    demands: [
+      { label: "Planejamento Fiscal", icon: "landmark" },
+      { label: "Educação Integral", icon: "graduation-cap" },
+      { label: "Paridade de Renda", icon: "heart" }
+    ]
   },
   {
     id: "romeu",
@@ -93,10 +207,14 @@ export const initialCandidates: Candidate[] = [
     party: "NOVO",
     partyNumber: 30,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     votes: 9400,
     percentage: 16,
-    proposals: ["Corte rigoroso de gastos", "Desregulamentação econômica", "Modernização da gestão pública"]
+    color: "amber",
+    demands: [
+      { label: "Corte de Gastos", icon: "landmark" },
+      { label: "Desregulamentação", icon: "briefcase" }
+    ]
   },
   {
     id: "ciro",
@@ -104,10 +222,14 @@ export const initialCandidates: Candidate[] = [
     party: "PDT",
     partyNumber: 12,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
     votes: 8200,
     percentage: 14,
-    proposals: ["Projeto Nacional de Desenvolvimento", "Reindustrialização tecnológica", "Refinanciamento do endividamento familiar"]
+    color: "rose",
+    demands: [
+      { label: "Projeto Nacional", icon: "landmark" },
+      { label: "Reindustrialização", icon: "zap" }
+    ]
   },
   {
     id: "ratinho",
@@ -115,10 +237,14 @@ export const initialCandidates: Candidate[] = [
     party: "PSD",
     partyNumber: 55,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
     votes: 7500,
     percentage: 13,
-    proposals: ["Infraestrutura logística integrada", "Sustentabilidade e energia limpa", "Inovação tecnológica no setor público"]
+    color: "sky",
+    demands: [
+      { label: "Logística Integrada", icon: "briefcase" },
+      { label: "Inovação Pública", icon: "zap" }
+    ]
   },
   {
     id: "eduardo",
@@ -126,10 +252,14 @@ export const initialCandidates: Candidate[] = [
     party: "PSDB",
     partyNumber: 45,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=150&fit=crop&crop=face",
     votes: 6800,
     percentage: 12,
-    proposals: ["Diálogo federativo", "Equilíbrio fiscal e reformas estruturantes", "Incentivo a primeira infância"]
+    color: "cyan",
+    demands: [
+      { label: "Pacto Federativo", icon: "landmark" },
+      { label: "Primeira Infância", icon: "heart" }
+    ]
   },
   {
     id: "marcal",
@@ -137,10 +267,14 @@ export const initialCandidates: Candidate[] = [
     party: "PRTB",
     partyNumber: 28,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
     votes: 6200,
     percentage: 11,
-    proposals: ["Empreendedorismo e inovação digital", "Desestatização massiva", "Educação financeira nas escolas"]
+    color: "lime",
+    demands: [
+      { label: "Empreendedorismo", icon: "zap" },
+      { label: "Desestatização", icon: "briefcase" }
+    ]
   },
   {
     id: "helena",
@@ -148,10 +282,14 @@ export const initialCandidates: Candidate[] = [
     party: "Cidadania",
     partyNumber: 23,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
     votes: 4100,
     percentage: 7,
-    proposals: ["Transparência governamental", "Fortalecimento institucional", "Investimento em cultura e comunicação pública"]
+    color: "rose",
+    demands: [
+      { label: "Transparência", icon: "landmark" },
+      { label: "Comunicação Cívica", icon: "heart" }
+    ]
   },
   {
     id: "marina",
@@ -159,10 +297,14 @@ export const initialCandidates: Candidate[] = [
     party: "REDE",
     partyNumber: 18,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150&h=150&fit=crop&crop=face",
     votes: 3900,
     percentage: 6,
-    proposals: ["Desmatamento zero", "Bioeconomia e transição energética", "Demarcação e proteção de territórios tradicionais"]
+    color: "emerald",
+    demands: [
+      { label: "Desmatamento Zero", icon: "tree" },
+      { label: "Transição Energética", icon: "leaf" }
+    ]
   },
   {
     id: "boulos",
@@ -170,10 +312,14 @@ export const initialCandidates: Candidate[] = [
     party: "PSOL",
     partyNumber: 50,
     role: "Presidência da República",
-    avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&h=150&fit=crop&crop=face",
+    photo: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&h=150&fit=crop&crop=face",
     votes: 3500,
     percentage: 6,
-    proposals: ["Habitação popular e combate aos imóveis ociosos", "Taxação de grandes fortunas", "Tarifa zero no transporte público"]
+    color: "purple",
+    demands: [
+      { label: "Habitação Popular", icon: "heart" },
+      { label: "Tarifa Zero", icon: "zap" }
+    ]
   }
 ];
 
@@ -184,7 +330,11 @@ export const initialComments: Comment[] = [
 ];
 
 export const initialDebates: Debate[] = [
-  { id: "1", title: "Prioridades Econômicas e Controle de Inflação 2026", category: "Economia", replies: 142, trending: true },
-  { id: "2", title: "Estratégias de Segurança Pública Integrada", category: "Segurança", replies: 89, trending: true },
-  { id: "3", title: "Metas Climáticas e Sustentabilidade", category: "Meio Ambiente", replies: 54, trending: false }
+  { id: "1", title: "Prioridades Econômicas e Controle de Inflação 2026", category: "Economia", replies: 142, trending: true, yesVotes: 890, noVotes: 420 },
+  { id: "2", title: "Estratégias de Segurança Pública Integrada", category: "Segurança", replies: 89, trending: true, yesVotes: 730, noVotes: 210 },
+  { id: "3", title: "Metas Climáticas e Sustentabilidade", category: "Meio Ambiente", replies: 54, trending: false, yesVotes: 510, noVotes: 180 }
 ];
+
+
+
+
