@@ -16,7 +16,7 @@ import {
   type Candidate,
   type Comment,
   type Debate,
-} from "../../lib/poll-data"
+} from "../lib/poll-data"
 
 export default function Page() {
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates)
@@ -116,4 +116,5 @@ export default function Page() {
     </div>
   )
 }
+
 
