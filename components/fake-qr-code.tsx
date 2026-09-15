@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useMemo } from "react"
 
@@ -69,3 +69,4 @@ export function FakeQrCode({ seed }: { seed: string }) {
     </div>
   )
 }
+

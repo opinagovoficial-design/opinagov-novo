@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { ArrowUpRight } from "lucide-react"
 import type { SecondaryTopic } from "@/lib/poll-data"
@@ -45,3 +45,4 @@ export function SecondaryTopics({ topics }: { topics: SecondaryTopic[] }) {
     </section>
   )
 }
+

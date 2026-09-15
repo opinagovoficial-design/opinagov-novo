@@ -75,13 +75,13 @@ export default function Page() {
 
       <div className="og-app-in relative">
         <LiveTicker />
-        <SiteHeader onCreate={() => setActiveCandidate(candidates[0])} />
+        <SiteHeader onCreate={() => setActiveCandidate(candidates[0] || null)} />
 
         <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
           <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
           <DebatesSection
             debates={debates}
-            onCreate={() => setActiveCandidate(candidates[0])}
+            onCreate={() => setActiveCandidate(candidates[0] || null)}
             onVote={handleDebateVote}
           />
           <CommunityWall comments={comments} candidates={candidates} />
@@ -97,7 +97,7 @@ export default function Page() {
 
       <button
         type="button"
-        onClick={() => setActiveCandidate(candidates[0])}
+        onClick={() => setActiveCandidate(candidates[0] || null)}
         className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-slate-950/80 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-emerald-500/10 backdrop-blur-xl transition-all hover:border-emerald-400/40 hover:bg-slate-900/90"
       >
         <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-slate-950">

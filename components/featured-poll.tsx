@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Info, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -82,3 +82,4 @@ export function FeaturedPoll({
     </section>
   )
 }
+

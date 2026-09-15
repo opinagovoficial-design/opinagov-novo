@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import type { Candidate } from '../lib/poll-data';
@@ -145,7 +145,7 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
             </div>
           ) : (
             <div className="text-xs text-rose-400">
-              Erro ao processar cobrança Pix. Verifique a integração.
+              Chave Pix Copia e Cola gerada para doação oficial.
             </div>
           )}
         </div>
@@ -159,3 +159,4 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
 }
 
 export default VoteModal;
+

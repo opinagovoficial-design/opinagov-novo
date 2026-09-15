@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Activity } from "lucide-react"
 
@@ -32,3 +32,4 @@ export function LiveTicker() {
     </div>
   )
 }
+

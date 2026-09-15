@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Image from "next/image"
 import { BadgeCheck } from "lucide-react"
@@ -70,3 +70,4 @@ export function CommunityWall({
     </section>
   )
 }
+

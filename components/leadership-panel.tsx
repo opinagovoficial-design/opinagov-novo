@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Crown } from "lucide-react"
 import { CandidateCard } from "@/components/candidate-card"
@@ -106,3 +106,4 @@ export function LeadershipPanel({
     </section>
   )
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Landmark, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -42,3 +42,4 @@ export function SiteHeader({ onCreate }: { onCreate: () => void }) {
     </header>
   )
 }
+
