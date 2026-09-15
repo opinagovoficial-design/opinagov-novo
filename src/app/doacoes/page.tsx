@@ -9,12 +9,13 @@ import {
   PlusCircle,
   Copy,
   Share2,
-  QrCode,
   DollarSign,
-  TrendingUp,
   Sparkles,
   Users,
   X,
+  Loader2,
+  QrCode,
+  CheckCircle2,
 } from "lucide-react"
 
 interface Demand {
@@ -70,17 +71,17 @@ export default function DoacoesPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null)
 
-  // Formulário de Criação
+  // Form de criação
   const [newTitle, setNewTitle] = useState("")
   const [newCategory, setNewCategory] = useState("Meio Ambiente")
   const [newDesc, setNewDesc] = useState("")
 
-  // Doação Pix
-  const [donationAmount, setDonationAmount] = useState("10")
+  // Doação Pix Real
+  const [donationAmount, setDonationAmount] = useState<number>(10)
+  const [loadingPix, setLoadingPix] = useState(false)
+  const [pixData, setPixData] = useState<{ qrCode: string; qrCodeBase64?: string } | null>(null)
   const [copied, setCopied] = useState(false)
-
-  // Chave Pix Centralizada da Plataforma
-  const centralPixKey = "contato@opinagov.com.br"
+  const [confirmed, setConfirmed] = useState(false)
 
   useEffect(() => {
     try {
@@ -90,6 +91,45 @@ export default function DoacoesPage() {
       }
     } catch {}
   }, [])
+
+  // Gera o Pix Real sempre que abre uma causa ou muda o valor
+  const loadPixForDemand = async (demand: Demand, amount: number) => {
+    setLoadingPix(true)
+    setPixData(null)
+    setCopied(false)
+    try {
+      const res = await fetch("/api/pix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: amount,
+          description: `Doacao Civica: ${demand.title.substring(0, 30)}`,
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.qrCode) {
+        setPixData({ qrCode: data.qrCode, qrCodeBase64: data.qrCodeBase64 })
+      }
+    } catch {
+      // Falha de rede ou timeout
+    } finally {
+      setLoadingPix(false)
+    }
+  }
+
+  const handleOpenDonateModal = (demand: Demand) => {
+    setSelectedDemand(demand)
+    setDonationAmount(10)
+    setConfirmed(false)
+    loadPixForDemand(demand, 10)
+  }
+
+  const handleChangeAmount = (val: number) => {
+    setDonationAmount(val)
+    if (selectedDemand) {
+      loadPixForDemand(selectedDemand, val)
+    }
+  }
 
   const handleCreateDemand = (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,7 +159,8 @@ export default function DoacoesPage() {
   }
 
   const handleCopyPix = () => {
-    navigator.clipboard.writeText(centralPixKey)
+    if (!pixData?.qrCode) return
+    navigator.clipboard.writeText(pixData.qrCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2500)
   }
@@ -128,6 +169,23 @@ export default function DoacoesPage() {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://opinagov.vercel.app"
     const text = `🤝 *Demanda Cívica em Alta no OpinaGov*\n\n"${demand.title}"\n\nParticipe e apoie esta causa no canal oficial de auditoria popular:\n👉 ${origin}/doacoes`
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank")
+  }
+
+  const handleConfirmDonation = () => {
+    if (!selectedDemand) return
+    setDemands((prev) =>
+      prev.map((d) =>
+        d.id === selectedDemand.id
+          ? { ...d, raised: d.raised + donationAmount, supporters: d.supporters + 1 }
+          : d
+      )
+    )
+    setConfirmed(true)
+    setTimeout(() => {
+      setConfirmed(false)
+      setSelectedDemand(null)
+      setPixData(null)
+    }, 1800)
   }
 
   return (
@@ -180,11 +238,11 @@ export default function DoacoesPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white">Central Cívica de Causas & Interesses Coletivos</h1>
-              <p className="text-xs text-slate-400">OpinaGov — Gestão Financeira e Arrecadação Auditada</p>
+              <p className="text-xs text-slate-400">OpinaGov — Arrecadação e Gestão Centralizada</p>
             </div>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-            Toda arrecadação gerada passa pela conta institucional do OpinaGov para garantir auditoria, combate a fraudes e prestação de contas transparente antes da execução.
+            Toda doação gera QR Code Pix oficial conectado à nossa conta centralizadora para garantir integridade, auditoria e repasse seguro.
           </p>
         </div>
 
@@ -232,7 +290,7 @@ export default function DoacoesPage() {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedDemand(d)}
+                  onClick={() => handleOpenDonateModal(d)}
                   className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5"
                 >
                   <DollarSign className="h-3.5 w-3.5" />
@@ -243,7 +301,7 @@ export default function DoacoesPage() {
           ))}
         </div>
 
-        {/* MODAL NOVA CAUSA */}
+        {/* MODAL CRIAR CAUSA */}
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
             <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
@@ -301,7 +359,7 @@ export default function DoacoesPage() {
 
                 <div className="bg-slate-950 p-3 rounded-xl border border-white/5 text-[11px] text-slate-400 flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-emerald-400 shrink-0" />
-                  O controle financeiro e a prestação de contas são centralizados pela equipe OpinaGov.
+                  Todas as doações são processadas na nossa conta central com QR Code para auditoria.
                 </div>
 
                 <button
@@ -315,68 +373,99 @@ export default function DoacoesPage() {
           </div>
         )}
 
-        {/* MODAL PIX OFICIAL */}
+        {/* MODAL PIX REAL COM QR CODE DA NOSSA CONTA */}
         {selectedDemand && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
             <div className="relative w-full max-w-md rounded-2xl border border-emerald-500/30 bg-slate-900 p-6 shadow-2xl text-center">
               <button
                 type="button"
-                onClick={() => setSelectedDemand(null)}
+                onClick={() => {
+                  setSelectedDemand(null)
+                  setPixData(null)
+                }}
                 className="absolute right-4 top-4 text-slate-400 hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-block mb-2">
-                Chave Oficial do OpinaGov
-              </span>
-              <h3 className="text-lg font-bold text-white mb-1">Apoio Financeiro à Causa</h3>
-              <p className="text-xs text-slate-300 mb-4 font-medium">"{selectedDemand.title}"</p>
+              {confirmed ? (
+                <div className="py-8">
+                  <CheckCircle2 className="h-14 w-14 text-emerald-400 mx-auto mb-3 animate-bounce" />
+                  <h3 className="text-xl font-bold text-white">Doação Confirmada!</h3>
+                  <p className="text-xs text-slate-300 mt-1">Obrigado pelo seu apoio cívico.</p>
+                </div>
+              ) : (
+                <div>
+                  <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-block mb-2">
+                    QR Code Oficial — Conta Central
+                  </span>
+                  <h3 className="text-lg font-bold text-white mb-1">Doação para a Causa</h3>
+                  <p className="text-xs text-slate-300 mb-4 font-medium line-clamp-1">"{selectedDemand.title}"</p>
 
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                {["5", "10", "25", "50"].map((v) => (
+                  {/* Seletor de Valor */}
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {[5, 10, 20, 50].map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => handleChangeAmount(v)}
+                        className={`py-2 rounded-lg text-xs font-bold border transition ${
+                          donationAmount === v
+                            ? "bg-emerald-600 border-emerald-400 text-white shadow"
+                            : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        R$ {v}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* QR Code Dinâmico do Mercado Pago */}
+                  <div className="flex flex-col items-center bg-slate-950 p-4 rounded-xl border border-white/10 mb-4">
+                    {loadingPix ? (
+                      <div className="flex flex-col items-center justify-center py-10 gap-2">
+                        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+                        <span className="text-xs text-slate-400">Gerando QR Code Pix de R$ {donationAmount},00...</span>
+                      </div>
+                    ) : pixData?.qrCodeBase64 ? (
+                      <div>
+                        <img
+                          src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                          alt="QR Code Pix"
+                          className="h-44 w-44 rounded-xl border-4 border-white bg-white p-1 mb-2 mx-auto"
+                        />
+                        <span className="text-[11px] text-slate-400 block">
+                          Aponte o app do seu banco ou use o código abaixo:
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center py-6 gap-2">
+                        <QrCode className="h-16 w-16 text-slate-500" />
+                        <span className="text-xs text-slate-400">Clique para atualizar a cobrança Pix</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {pixData?.qrCode && (
+                    <button
+                      type="button"
+                      onClick={handleCopyPix}
+                      className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-white/10 mb-3 transition flex items-center justify-center gap-2"
+                    >
+                      <Copy className="h-4 w-4" />
+                      {copied ? "Código Pix Copiado com Sucesso!" : "Copiar Código Pix (Copia e Cola)"}
+                    </button>
+                  )}
+
                   <button
-                    key={v}
                     type="button"
-                    onClick={() => setDonationAmount(v)}
-                    className={`py-2 rounded-lg text-xs font-bold border transition ${
-                      donationAmount === v
-                        ? "bg-emerald-600 border-emerald-400 text-white shadow"
-                        : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
-                    }`}
+                    onClick={handleConfirmDonation}
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-lg transition"
                   >
-                    R$ {v}
+                    Já Efetuei o Pix — Confirmar Contribuição
                   </button>
-                ))}
-              </div>
-
-              <div className="flex flex-col items-center bg-slate-950 p-4 rounded-xl border border-white/10 mb-4">
-                <QrCode className="h-16 w-16 text-emerald-400 mb-2" />
-                <span className="text-[11px] text-slate-400 mb-1">Chave Pix Centralizadora:</span>
-                <span className="text-xs font-mono font-bold text-white bg-white/5 px-2.5 py-1 rounded select-all">
-                  {centralPixKey}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCopyPix}
-                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-white/10 mb-3 transition flex items-center justify-center gap-2"
-              >
-                <Copy className="h-4 w-4" />
-                {copied ? "Chave Pix Copiada com Sucesso!" : "Copiar Chave Pix Oficial"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedDemand(null)
-                  alert("Contribuição registrada! O OpinaGov agradece pelo seu apoio à causa.")
-                }}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs shadow-lg transition"
-              >
-                Já Fiz a Doação — Registrar Apoio
-              </button>
+                </div>
+              )}
             </div>
           </div>
         )}
