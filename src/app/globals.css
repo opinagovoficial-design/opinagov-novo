@@ -1,5 +1,5 @@
 ﻿@import 'tailwindcss';
-@import 'tw-animate-css';
+
 @import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -240,3 +240,4 @@
 .og-modal-in {
   animation: og-modal-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
