@@ -1,144 +1,82 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
-
-const casosEmergencia = [
-  {
-    id: '1',
-    titulo: 'Apoio às Famílias Atingidas pelas Enchentes',
-    local: 'Região Metropolitana / Comunidades Locais',
-    descricao: 'Ajuda humanitária imediata com compra de cestas básicas, água potável e kits de higiene para as famílias desabrigadas.',
-    meta: 50000,
-    arrecadado: 18450,
-  },
-  {
-    id: '2',
-    titulo: 'Fundo de Solidariedade Comunitária',
-    local: 'Ação Social Contínua',
-    descricao: 'Recursos destinados a suporte emergencial de saúde e alimentação para núcleos familiares em situação de vulnerabilidade extrema.',
-    meta: 20000,
-    arrecadado: 9200,
-  }
-];
+import React, { useState } from 'react';
+import Link from 'next/link';
 
 export default function DoacoesPage() {
-  const [casoSelecionado, setCasoSelecionado] = useState(casosEmergencia[0]);
-  const [valorDoacao, setValorDoacao] = useState('50');
-  const [pixGerado, setPixGerado] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+  const [pixData, setPixData] = useState<{ qr_code: string; qr_code_base64: string } | null>(null);
 
-  const handleDoar = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulação do QR Code Pix que será integrado com a Efí amanhã
-    setPixGerado("00020126580014br.gov.bcb.pix... [CHAVE PIX OFICIAL OPINAGOV]");
-  };
+  async function doar(valor: number) {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/gerar-pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor, candidatoNome: 'Manutenção da Plataforma OpinaGov' }),
+      });
+      const data = await res.json();
+      if (data.qr_code) {
+        setPixData({ qr_code: data.qr_code, qr_code_base64: data.qr_code_base64 });
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 md:p-12">
-      <div className="max-w-4xl mx-auto space-y-8">
-        
-        {/* Cabeçalho */}
-        <div className="text-center space-y-3">
-          <span className="bg-red-600/20 text-red-400 border border-red-500/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            Ação Solidária & Emergencial
-          </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-            Doações Humanitárias OpinaGov
-          </h1>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm md:text-base">
-            Contribua diretamente para quem mais precisa. Transparência total na arrecadação e entrega rápida nas comunidades assistidas.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#070a13] text-slate-100 p-6 flex flex-col items-center justify-center">
+      <div className="w-full max-w-lg p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl text-center space-y-4">
+        <h1 className="text-2xl font-bold text-white">Apoie o OpinaGov</h1>
+        <p className="text-xs text-slate-400">
+          Somos uma plataforma cívica independente de auditoria popular. Sua contribuição mantém os servidores ativos e seguros.
+        </p>
 
-        {/* Lista de Casos */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {casosEmergencia.map((caso) => (
-            <div 
-              key={caso.id}
-              onClick={() => setCasoSelecionado(caso)}
-              className={`p-6 rounded-2xl border transition-all cursor-pointer bg-slate-900/50 backdrop-blur-sm ${
-                casoSelecionado.id === caso.id 
-                  ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg shadow-emerald-950/50' 
-                  : 'border-slate-800 hover:border-slate-700'
-              }`}
+        <div className="grid grid-cols-3 gap-3 my-4">
+          {[5, 10, 25].map((val) => (
+            <button
+              key={val}
+              onClick={() => doar(val)}
+              className="py-3 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 rounded-xl font-bold text-sm border border-slate-700 transition"
             >
-              <h3 className="text-lg font-bold text-slate-100 mb-1">{caso.titulo}</h3>
-              <p className="text-xs text-emerald-400 font-medium mb-3">📍 {caso.local}</p>
-              <p className="text-slate-300 text-sm mb-4 line-clamp-2">{caso.descricao}</p>
-              
-              {/* Barra de Progresso */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>Arrecadado: R$ {caso.arrecadado.toLocaleString('pt-BR')}</span>
-                  <span>Meta: R$ {caso.meta.toLocaleString('pt-BR')}</span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                    style={{ width: `${Math.min(100, (caso.arrecadado / caso.meta) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
+              R$ {val},00
+            </button>
           ))}
         </div>
 
-        {/* Bloco de Pagamento Pix */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
-          <h2 className="text-xl font-bold mb-4 text-emerald-400">
-            Apoiar: {casoSelecionado.titulo}
-          </h2>
+        {loading && <p className="text-xs text-cyan-400">Gerando cobrança Pix...</p>}
 
-          <form onSubmit={handleDoar} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Escolha ou digite o valor da doação (R$):
-              </label>
-              <div className="grid grid-cols-4 gap-3 mb-3">
-                {['20', '50', '100', '200'].map((val) => (
-                  <button
-                    type="button"
-                    key={val}
-                    onClick={() => setValorDoacao(val)}
-                    className={`py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                      valorDoacao === val 
-                        ? 'bg-emerald-600 border-emerald-500 text-white shadow-md' 
-                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
-                    }`}
-                  >
-                    R$ {val}
-                  </button>
-                ))}
-              </div>
-              <input
-                type="number"
-                value={valorDoacao}
-                onChange={(e) => setValorDoacao(e.target.value)}
-                placeholder="Outro valor"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                min="1"
-                required
+        {pixData && (
+          <div className="flex flex-col items-center gap-3 p-4 bg-slate-950 rounded-xl border border-slate-800">
+            {pixData.qr_code_base64 && (
+              <img
+                src={`data:image/png;base64,${pixData.qr_code_base64}`}
+                alt="QR Code Pix"
+                className="w-40 h-40 bg-white p-2 rounded-lg"
               />
-            </div>
-
+            )}
             <button
-              type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-900/30 transition-all duration-200 text-center tracking-wide"
+              onClick={() => {
+                navigator.clipboard.writeText(pixData.qr_code);
+                setCopiado(true);
+                setTimeout(() => setCopiado(false), 2000);
+              }}
+              className="w-full py-2 bg-cyan-500 text-slate-950 font-bold text-xs rounded-lg"
             >
-              Gerar Pix Solidário de R$ {valorDoacao}
+              {copiado ? '✓ Código Copiado!' : 'Copiar Código Pix'}
             </button>
-          </form>
+          </div>
+        )}
 
-          {pixGerado && (
-            <div className="mt-6 p-4 bg-slate-950 border border-emerald-500/30 rounded-2xl text-center space-y-3 animate-fade-in">
-              <p className="text-sm text-emerald-400 font-semibold">Pix gerado com sucesso! Escaneie ou copie o código abaixo:</p>
-              <div className="p-3 bg-white text-slate-950 rounded-xl font-mono text-xs break-all select-all">
-                {pixGerado}
-              </div>
-            </div>
-          )}
+        <div className="pt-4">
+          <Link href="/" className="text-xs text-slate-400 hover:text-cyan-400 underline">
+            ← Voltar para a Home
+          </Link>
         </div>
-
       </div>
-    </main>
+    </div>
   );
 }
