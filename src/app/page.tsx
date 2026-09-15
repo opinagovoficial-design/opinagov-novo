@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"
 import { SplashReveal } from "../components/splash-reveal"
 import { LiveTicker } from "../components/live-ticker"
+import { CommunityTicker } from "../components/community-ticker"
 import { SiteHeader } from "../components/site-header"
 import { LeadershipPanel } from "../components/leadership-panel"
 import { VoteModal } from "../components/vote-modal"
 import { CommunityWall } from "../components/community-wall"
 import { DebatesSection } from "../components/debates-section"
-import { LiveVoteToast } from "@/components/live-vote-toast"
+import { LiveVoteToast } from "../components/live-vote-toast"
 import {
   initialCandidates,
   initialComments,
@@ -45,19 +46,19 @@ export default function Page() {
   const [debates, setDebates] = useState<Debate[]>(initialDebates)
   const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(null)
 
-  // Banner Ativo com persistência (40 dias)
+  // Banner Ativo de 40 dias
   const [activeBanner, setActiveBanner] = useState<ActiveBanner | null>(null)
 
-  // Modais de Criação e Anúncio
+  // Modais
   const [showCreateDebate, setShowCreateDebate] = useState(false)
   const [showAdModal, setShowAdModal] = useState(false)
   const [debateCreatedSuccess, setDebateCreatedSuccess] = useState<Debate | null>(null)
 
-  // Formulário de Duelo
+  // Formulário Duelo
   const [newTitle, setNewTitle] = useState("")
   const [newCategory, setNewCategory] = useState("Economia")
 
-  // Formulário de Anúncio / Banner 40 Dias
+  // Formulário Anúncio 40 Dias
   const [adStep, setAdStep] = useState<"form" | "pix" | "success">("form")
   const [adTitle, setAdTitle] = useState("")
   const [adTargetUrl, setAdTargetUrl] = useState("")
@@ -228,9 +229,10 @@ export default function Page() {
       <SplashReveal />
       <LiveTicker />
       <SiteHeader onCreate={() => setShowCreateDebate(true)} />
+      <CommunityTicker />
 
       <main className="relative pb-24">
-        {/* BANNER DINÂMICO DE 40 DIAS OU CHAMADA PARA ANUNCIAR */}
+        {/* BANNER DINÂMICO DE 40 DIAS OU CHAMADA */}
         <div className="max-w-5xl mx-auto px-4 my-6">
           {activeBanner ? (
             <div className="relative group overflow-hidden rounded-2xl border border-amber-500/40 bg-slate-900 shadow-2xl">
@@ -301,7 +303,6 @@ export default function Page() {
         <p>OpinaGov — Painel Cívico Independente e Auditado.</p>
       </footer>
 
-      {/* Modal de Candidato */}
       {activeCandidate && (
         <VoteModal
           candidate={activeCandidate}
@@ -310,7 +311,6 @@ export default function Page() {
         />
       )}
 
-      {/* Modal Criar Duelo */}
       {showCreateDebate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
@@ -418,7 +418,6 @@ export default function Page() {
         </div>
       )}
 
-      {/* MODAL DE AUTOATENDIMENTO: UPLOAD DE BANNER 40 DIAS + PIX R$ 1.000 */}
       {showAdModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
           <div className="relative w-full max-w-lg rounded-2xl border border-amber-500/40 bg-slate-900 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -485,7 +484,7 @@ export default function Page() {
 
                   <div>
                     <label className="block text-xs text-slate-300 font-medium mb-1">
-                      Arte do Banner (Formato Retangular Recomendado)
+                      Arte do Banner (Formato Retangular)
                     </label>
                     <label className="flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-amber-400/60 rounded-xl p-4 cursor-pointer bg-white/5 transition">
                       {adImagePreview ? (
@@ -599,5 +598,3 @@ export default function Page() {
     </div>
   )
 }
-
-

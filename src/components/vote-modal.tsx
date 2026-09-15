@@ -1,8 +1,9 @@
 ﻿"use client"
 
 import { useState } from "react"
-import { X, ShieldCheck, Share2, CheckCircle2, Copy, Loader2, QrCode } from "lucide-react"
+import { X, ShieldCheck, Share2, CheckCircle2, Copy, Loader2 } from "lucide-react"
 import { type Candidate } from "@/lib/poll-data"
+import { PixCheckoutCard } from "@/components/pix-checkout-card"
 
 interface VoteModalProps {
   candidate: Candidate | null
@@ -15,10 +16,8 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
   const [message, setMessage] = useState("")
   const [step, setStep] = useState<"form" | "pix" | "share">("form")
 
-  // Estados Pix
   const [loadingPix, setLoadingPix] = useState(false)
   const [pixData, setPixData] = useState<{ qrCode: string; qrCodeBase64?: string } | null>(null)
-  const [copied, setCopied] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
   if (!candidate) return null
@@ -28,7 +27,6 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
     setStep("pix")
     setLoadingPix(true)
     setPixData(null)
-    setCopied(false)
     setErrorMessage("")
 
     try {
@@ -54,13 +52,6 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
     }
   }
 
-  const handleCopyPix = () => {
-    if (!pixData?.qrCode) return
-    navigator.clipboard.writeText(pixData.qrCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2500)
-  }
-
   const handleConfirmPayment = () => {
     onConfirm({ name: voterName || "Eleitor Verificado", message })
     setStep("share")
@@ -75,7 +66,7 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
-      <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <button
           type="button"
           onClick={onClose}
@@ -130,7 +121,7 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
           </div>
         )}
 
-        {/* ETAPA 2: QR CODE PIX REAL & COPIA E COLA */}
+        {/* ETAPA 2: CHECKOUT PIX */}
         {step === "pix" && (
           <div>
             <div className="text-center mb-4">
@@ -140,51 +131,20 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
               </p>
             </div>
 
-            <div className="flex items-center justify-between bg-slate-950 p-3.5 rounded-xl border border-white/10 mb-4">
-              <span className="text-xs text-slate-400">Valor da Taxa Cívica:</span>
-              <span className="text-base font-black text-emerald-400">R$ 1,00</span>
-            </div>
-
             {loadingPix ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
                 <p className="text-xs text-slate-400">Gerando cobrança Pix oficial...</p>
               </div>
             ) : pixData ? (
-              <div className="flex flex-col items-center">
-                {pixData.qrCodeBase64 ? (
-                  <img
-                    src={`data:image/png;base64,${pixData.qrCodeBase64}`}
-                    alt="QR Code Pix"
-                    className="h-44 w-44 rounded-xl border-4 border-white bg-white p-1 mb-3"
-                  />
-                ) : (
-                  <div className="flex h-44 w-44 items-center justify-center rounded-xl bg-slate-800 border border-white/10 mb-3">
-                    <QrCode className="h-16 w-16 text-slate-400" />
-                  </div>
-                )}
-
-                <p className="text-[11px] text-slate-400 text-center mb-3">
-                  Aponte a câmera do seu banco ou use o Copia e Cola abaixo:
-                </p>
-
-                <button
-                  type="button"
-                  onClick={handleCopyPix}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-xs border border-white/10 mb-3 transition"
-                >
-                  <Copy className="h-4 w-4" />
-                  {copied ? "Código Pix Copiado!" : "Copiar Código Pix (Copia e Cola)"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleConfirmPayment}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-lg text-xs shadow-lg transition text-center"
-                >
-                  Já Efetuei o Pix — Confirmar Meu Voto
-                </button>
-              </div>
+              <PixCheckoutCard
+                amount={1.0}
+                qrCode={pixData.qrCode}
+                qrCodeBase64={pixData.qrCodeBase64}
+                description={`Apoio Cívico: ${candidate.name}`}
+                onConfirm={handleConfirmPayment}
+                confirmButtonText="Já Efetuei o Pix — Confirmar Meu Voto"
+              />
             ) : (
               <div className="text-center py-4">
                 <p className="text-xs text-rose-400 mb-3">{errorMessage}</p>
