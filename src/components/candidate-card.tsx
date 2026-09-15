@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useId, useState } from "react"
 import Image from "next/image"
@@ -18,15 +18,23 @@ import {
 import { Button } from "@/components/ui/button"
 import { colorStyles, type Candidate, type DemandIcon } from "@/lib/poll-data"
 
-const demandIcons: Record<DemandIcon, typeof HeartPulse> = {
+const demandIcons: Record<string, any> = {
   health: HeartPulse,
+  heart: HeartPulse,
   transport: Bike,
   money: Banknote,
   education: GraduationCap,
+  "graduation-cap": GraduationCap,
   security: ShieldCheck,
+  shield: ShieldCheck,
   housing: Home,
   environment: Leaf,
+  leaf: Leaf,
+  tree: Leaf,
   work: Briefcase,
+  briefcase: Briefcase,
+  zap: TrendingUp,
+  landmark: Banknote,
 }
 
 const numberFmt = new Intl.NumberFormat("pt-BR")
@@ -120,7 +128,7 @@ export function CandidateCard({
           <div className="overflow-hidden">
             <ul className="flex flex-col gap-2 px-3.5 pb-3.5 pt-0.5">
               {candidate.demands.map((d) => {
-                const Icon = demandIcons[d.icon]
+                const Icon = demandIcons[d.icon] || TrendingUp
                 return (
                   <li
                     key={d.label}
@@ -147,3 +155,4 @@ export function CandidateCard({
     </article>
   )
 }
+
