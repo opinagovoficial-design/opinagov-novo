@@ -1,47 +1,49 @@
-﻿export type VoteSide = "yes" | "no"
+﻿export type VoteSide = "sim" | "nao" | "yes" | "no";
 
 export interface CandidateDemand {
-  icon: string
-  label: string
+  icon: string;
+  label: string;
 }
 
 export interface Candidate {
-  id: string
-  name: string
-  ballotName: string
-  role: string
-  party: string
-  ballotNumber: string
-  color: string
-  votes: number
-  photo?: string
-  demands: CandidateDemand[]
+  id: string;
+  name: string;
+  ballotName: string;
+  role: string;
+  party: string;
+  ballotNumber: string;
+  color: string;
+  votes: number;
+  photo?: string;
+  demands: CandidateDemand[];
 }
 
 export interface Comment {
-  id: string
-  author: string
-  city: string
-  candidateId: string
-  message: string
-  timestamp?: string
+  id: string;
+  author: string;
+  city: string;
+  candidateId: string;
+  message: string;
+  timestamp?: string;
 }
 
 export interface Debate {
-  id: string
-  title: string
-  category: string
-  replies: number
-  trending: boolean
-  yesVotes: number
-  noVotes: number
+  id: string;
+  title: string;
+  category: string;
+  replies: number;
+  trending: boolean;
+  yesVotes: number;
+  noVotes: number;
 }
 
 export interface SecondaryTopic {
-  id: string
-  title: string
-  category: string
-  votes: number
+  id: string;
+  title: string;
+  category: string;
+  votes?: number;
+  simPercent: number;
+  totalVotes: number;
 }
 
 export const colorStyles: Record<
@@ -104,7 +106,7 @@ export const colorStyles: Record<
     ring: "ring-lime-500",
     dot: "bg-lime-400",
   },
-}
+};
 
 export const initialCandidates: Candidate[] = [
   {
@@ -293,7 +295,7 @@ export const initialCandidates: Candidate[] = [
       { icon: "zap", label: "Soberania Nacional e Mobilização Operária" },
     ],
   },
-]
+];
 
 export const initialDebates: Debate[] = [
   {
@@ -323,7 +325,7 @@ export const initialDebates: Debate[] = [
     yesVotes: 690,
     noVotes: 240,
   },
-]
+];
 
 export const initialComments: Comment[] = [
   {
@@ -350,4 +352,4 @@ export const initialComments: Comment[] = [
     message: "A experiência na segurança pública de Goiás é a referência.",
     timestamp: "Há 32 min",
   },
-]
+];

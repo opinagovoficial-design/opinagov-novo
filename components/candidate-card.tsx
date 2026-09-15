@@ -47,14 +47,18 @@ export function CandidateCard({
   percent?: number
   rank: number
   totalVotes?: number
-  onVote: (cand?: any) => void
+  onVote: (cand: Candidate) => void
 }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
   const displayPercent = typeof percent === "number" ? percent : 0
-  const colors = (colorStyles && colorStyles[candidate.color]) || { bg: "bg-cyan-600", bar: "bg-cyan-500", text: "text-cyan-400" }
+  const colors = (colorStyles && candidate?.color && colorStyles[candidate.color]) || {
+    bg: "bg-cyan-600",
+    bar: "bg-cyan-500",
+    text: "text-cyan-400",
+  }
 
-  const initials = candidate.name
+  const initials = candidate?.name
     ? candidate.name
         .split(" ")
         .filter(Boolean)
@@ -73,18 +77,25 @@ export function CandidateCard({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-white">{candidate.name}</h3>
+              <h3 className="font-semibold text-white">{candidate?.name || "Candidato"}</h3>
             </div>
-            <p className="text-xs text-slate-400">{candidate.role}</p>
-            <span className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-bold rounded ${colors.bg} text-white`}>
-              {candidate.party}
-            </span>
+            <p className="text-xs text-slate-400">{candidate?.role || "Presidência da República"}</p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${colors.bg} text-white`}>
+                {candidate?.party || "IND"}
+              </span>
+              {candidate?.ballotNumber && (
+                <span className="text-[10px] font-mono text-slate-400 bg-white/5 px-1.5 py-0.5 rounded">
+                  #{candidate.ballotNumber}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="text-right">
           <div className="text-2xl font-black text-white">{displayPercent}%</div>
-          <div className="text-[11px] text-slate-400">{numberFmt.format(candidate.votes)} votos</div>
+          <div className="text-[11px] text-slate-400">{numberFmt.format(candidate?.votes || 0)} votos</div>
         </div>
       </div>
 
@@ -97,7 +108,7 @@ export function CandidateCard({
         </div>
       </div>
 
-      {candidate.demands && candidate.demands.length > 0 && (
+      {candidate?.demands && candidate.demands.length > 0 && (
         <div className="mt-3">
           <button
             type="button"
