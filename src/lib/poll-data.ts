@@ -27,6 +27,21 @@ export interface Debate {
   trending: boolean;
 }
 
+export const colorStyles: Record<string, { bg: string; text: string; border: string; bar: string }> = {
+  PT: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", bar: "bg-red-500" },
+  Republicanos: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", bar: "bg-blue-500" },
+  "União Brasil": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20", bar: "bg-cyan-500" },
+  MDB: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", bar: "bg-emerald-500" },
+  NOVO: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", bar: "bg-orange-500" },
+  PDT: { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20", bar: "bg-rose-500" },
+  PSD: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20", bar: "bg-yellow-500" },
+  PSDB: { bg: "bg-sky-500/10", text: "text-sky-400", border: "border-sky-500/20", bar: "bg-sky-500" },
+  PRTB: { bg: "bg-lime-500/10", text: "text-lime-400", border: "border-lime-500/20", bar: "bg-lime-500" },
+  Cidadania: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20", bar: "bg-pink-500" },
+  REDE: { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20", bar: "bg-teal-500" },
+  PSOL: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", bar: "bg-purple-500" },
+};
+
 export const initialCandidates: Candidate[] = [
   {
     id: "lula",

@@ -1,194 +1,190 @@
-export type Candidate = {
-  id: string
-  name: string
-  role: string
-  party: string
-  photo: string
-  votes: number
-  /** Tailwind color token used for bars and accents, e.g. "emerald" */
-  color: CandidateColor
-  demands: { icon: DemandIcon; label: string }[]
+﻿export interface Candidate {
+  id: string;
+  name: string;
+  party: string;
+  partyNumber: number;
+  role: string;
+  avatar: string;
+  votes: number;
+  percentage: number;
+  proposals: string[];
 }
 
-export type CandidateColor = "emerald" | "sky" | "amber" | "violet"
-
-export type DemandIcon =
-  | "health"
-  | "transport"
-  | "money"
-  | "education"
-  | "security"
-  | "housing"
-  | "environment"
-  | "work"
-
-export type Comment = {
-  id: string
-  author: string
-  city: string
-  candidateId: string
-  message: string
+export interface Comment {
+  id: string;
+  author: string;
+  city: string;
+  candidateId: string;
+  message: string;
+  timestamp: string;
 }
 
-export type Debate = {
-  id: string
-  category: string
-  title: string
-  yesVotes: number
-  noVotes: number
+export interface Debate {
+  id: string;
+  title: string;
+  category: string;
+  replies: number;
+  trending: boolean;
 }
 
-/** Fixed color styles per candidate token — avoids dynamic Tailwind class names. */
-export const colorStyles: Record<
-  CandidateColor,
-  { bar: string; text: string; soft: string; ring: string; dot: string; button: string }
-> = {
-  emerald: {
-    bar: "bg-emerald-500",
-    text: "text-emerald-400",
-    soft: "bg-emerald-500/10 text-emerald-300",
-    ring: "ring-emerald-500/40",
-    dot: "bg-emerald-500",
-    button: "bg-emerald-500 hover:bg-emerald-400 text-emerald-950",
-  },
-  sky: {
-    bar: "bg-sky-500",
-    text: "text-sky-400",
-    soft: "bg-sky-500/10 text-sky-300",
-    ring: "ring-sky-500/40",
-    dot: "bg-sky-500",
-    button: "bg-sky-500 hover:bg-sky-400 text-sky-950",
-  },
-  amber: {
-    bar: "bg-amber-500",
-    text: "text-amber-400",
-    soft: "bg-amber-500/10 text-amber-300",
-    ring: "ring-amber-500/40",
-    dot: "bg-amber-500",
-    button: "bg-amber-500 hover:bg-amber-400 text-amber-950",
-  },
-  violet: {
-    bar: "bg-violet-500",
-    text: "text-violet-400",
-    soft: "bg-violet-500/10 text-violet-300",
-    ring: "ring-violet-500/40",
-    dot: "bg-violet-500",
-    button: "bg-violet-500 hover:bg-violet-400 text-violet-950",
-  },
-}
+export const colorStyles: Record<string, { bg: string; text: string; border: string; bar: string }> = {
+  PT: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", bar: "bg-red-500" },
+  Republicanos: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", bar: "bg-blue-500" },
+  "União Brasil": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20", bar: "bg-cyan-500" },
+  MDB: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", bar: "bg-emerald-500" },
+  NOVO: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", bar: "bg-orange-500" },
+  PDT: { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/20", bar: "bg-rose-500" },
+  PSD: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20", bar: "bg-yellow-500" },
+  PSDB: { bg: "bg-sky-500/10", text: "text-sky-400", border: "border-sky-500/20", bar: "bg-sky-500" },
+  PRTB: { bg: "bg-lime-500/10", text: "text-lime-400", border: "border-lime-500/20", bar: "bg-lime-500" },
+  Cidadania: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20", bar: "bg-pink-500" },
+  REDE: { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20", bar: "bg-teal-500" },
+  PSOL: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", bar: "bg-purple-500" },
+};
 
 export const initialCandidates: Candidate[] = [
   {
-    id: "cand-1",
+    id: "lula",
     name: "Luiz Inácio Lula da Silva",
+    party: "PT",
+    partyNumber: 13,
     role: "Presidência da República",
-    party: "PT · 13",
-    photo: "/candidates/candidate-1.png",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
     votes: 15840,
-    color: "emerald",
-    demands: [
-      { icon: "work", label: "Ampliação do PAC" },
-      { icon: "money", label: "Isenção de IR até R$ 5 mil" },
-      { icon: "environment", label: "Transição Ecológica" },
-    ],
+    percentage: 28,
+    proposals: ["Fortalecimento de programas sociais", "Transição ecológica", "Reforma tributária progressiva"]
   },
   {
-    id: "cand-2",
+    id: "tarcisio",
     name: "Tarcísio de Freitas",
+    party: "Republicanos",
+    partyNumber: 10,
     role: "Presidência da República",
-    party: "Republicanos · 10",
-    photo: "/candidates/candidate-2.png",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     votes: 15120,
-    color: "sky",
-    demands: [
-      { icon: "money", label: "Privatizações estatais" },
-      { icon: "transport", label: "Choque de infraestrutura" },
-      { icon: "work", label: "Redução da máquina" },
-    ],
+    percentage: 27,
+    proposals: ["Privatizações e concessões", "Segurança pública ostensiva", "Atração de investimentos externos"]
   },
   {
-    id: "cand-3",
+    id: "ronaldo",
     name: "Ronaldo Caiado",
+    party: "União Brasil",
+    partyNumber: 44,
     role: "Presidência da República",
-    party: "União Brasil · 44",
-    photo: "/candidates/candidate-3.png",
-    votes: 13060,
-    color: "amber",
-    demands: [
-      { icon: "security", label: "Tolerância zero na segurança" },
-      { icon: "work", label: "Expansão do agronegócio" },
-      { icon: "money", label: "Descentralização de recursos" },
-    ],
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    votes: 12900,
+    percentage: 23,
+    proposals: ["Tolerância zero ao crime", "Valorização do agronegócio", "Eficiência administrativa"]
   },
   {
-    id: "cand-4",
+    id: "simone",
     name: "Simone Tebet",
+    party: "MDB",
+    partyNumber: 15,
     role: "Presidência da República",
-    party: "MDB · 15",
-    photo: "/candidates/candidate-4.png",
-    votes: 12180,
-    color: "violet",
-    demands: [
-      { icon: "money", label: "Responsabilidade fiscal" },
-      { icon: "education", label: "Foco na primeira infância" },
-      { icon: "work", label: "Reforma administrativa" },
-    ],
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face",
+    votes: 12340,
+    percentage: 22,
+    proposals: ["Planejamento fiscal de longo prazo", "Educação em tempo integral", "Igualdade salarial"]
   },
-]
+  {
+    id: "romeu",
+    name: "Romeu Zema",
+    party: "NOVO",
+    partyNumber: 30,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    votes: 9400,
+    percentage: 16,
+    proposals: ["Corte rigoroso de gastos", "Desregulamentação econômica", "Modernização da gestão pública"]
+  },
+  {
+    id: "ciro",
+    name: "Ciro Gomes",
+    party: "PDT",
+    partyNumber: 12,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
+    votes: 8200,
+    percentage: 14,
+    proposals: ["Projeto Nacional de Desenvolvimento", "Reindustrialização tecnológica", "Refinanciamento do endividamento familiar"]
+  },
+  {
+    id: "ratinho",
+    name: "Ratinho Júnior",
+    party: "PSD",
+    partyNumber: 55,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+    votes: 7500,
+    percentage: 13,
+    proposals: ["Infraestrutura logística integrada", "Sustentabilidade e energia limpa", "Inovação tecnológica no setor público"]
+  },
+  {
+    id: "eduardo",
+    name: "Eduardo Leite",
+    party: "PSDB",
+    partyNumber: 45,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&h=150&fit=crop&crop=face",
+    votes: 6800,
+    percentage: 12,
+    proposals: ["Diálogo federativo", "Equilíbrio fiscal e reformas estruturantes", "Incentivo a primeira infância"]
+  },
+  {
+    id: "marcal",
+    name: "Pablo Marçal",
+    party: "PRTB",
+    partyNumber: 28,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    votes: 6200,
+    percentage: 11,
+    proposals: ["Empreendedorismo e inovação digital", "Desestatização massiva", "Educação financeira nas escolas"]
+  },
+  {
+    id: "helena",
+    name: "Helena Chagas",
+    party: "Cidadania",
+    partyNumber: 23,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+    votes: 4100,
+    percentage: 7,
+    proposals: ["Transparência governamental", "Fortalecimento institucional", "Investimento em cultura e comunicação pública"]
+  },
+  {
+    id: "marina",
+    name: "Marina Silva",
+    party: "REDE",
+    partyNumber: 18,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150&h=150&fit=crop&crop=face",
+    votes: 3900,
+    percentage: 6,
+    proposals: ["Desmatamento zero", "Bioeconomia e transição energética", "Demarcação e proteção de territórios tradicionais"]
+  },
+  {
+    id: "boulos",
+    name: "Guilherme Boulos",
+    party: "PSOL",
+    partyNumber: 50,
+    role: "Presidência da República",
+    avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&h=150&fit=crop&crop=face",
+    votes: 3500,
+    percentage: 6,
+    proposals: ["Habitação popular e combate aos imóveis ociosos", "Taxação de grandes fortunas", "Tarifa zero no transporte público"]
+  }
+];
 
 export const initialComments: Comment[] = [
-  {
-    id: "c1",
-    author: "Marina Alves",
-    city: "Porto Alegre, RS",
-    candidateId: "cand-1",
-    message:
-      "Espero que a promessa de saúde 24h saia do papel. Vou cobrar isso durante todo o mandato.",
-  },
-  {
-    id: "c2",
-    author: "Ricardo Nunes",
-    city: "Campinas, SP",
-    candidateId: "cand-2",
-    message:
-      "Redução de taxas ajuda quem empreende. Mas quero ver plano concreto para o comércio de rua.",
-  },
-  {
-    id: "c3",
-    author: "Juliana Prado",
-    city: "Fortaleza, CE",
-    candidateId: "cand-3",
-    message: "Ciclovias conectadas de verdade mudam a cidade. Conta com o meu apoio e a minha cobrança.",
-  },
-  {
-    id: "c4",
-    author: "Eduardo Lima",
-    city: "Curitiba, PR",
-    candidateId: "cand-1",
-    message: "Creche em tempo integral é o que a periferia mais precisa. Fico de olho no cronograma.",
-  },
-]
+  { id: "1", author: "Carlos M.", city: "São Paulo, SP", candidateId: "tarcisio", message: "Infraestrutura é a chave para o crescimento.", timestamp: "Há 5 min" },
+  { id: "2", author: "Ana Paula R.", city: "Belo Horizonte, MG", candidateId: "lula", message: "Foco nos programas sociais e estabilidade alimentar.", timestamp: "Há 12 min" },
+  { id: "3", author: "Marcos V.", city: "Goiânia, GO", candidateId: "ronaldo", message: "Segurança e firmeza na gestão do país.", timestamp: "Há 25 min" }
+];
 
 export const initialDebates: Debate[] = [
-  {
-    id: "d1",
-    category: "Mobilidade Urbana",
-    title: "Ampliar a malha de ciclovias no centro da cidade?",
-    yesVotes: 4213,
-    noVotes: 1980,
-  },
-  {
-    id: "d2",
-    category: "Comércio e Cidade",
-    title: "Liberar o comércio de rua aos domingos?",
-    yesVotes: 3187,
-    noVotes: 4402,
-  },
-  {
-    id: "d3",
-    category: "Segurança Pública",
-    title: "Instalar câmeras inteligentes nas praças?",
-    yesVotes: 5890,
-    noVotes: 1240,
-  },
-]
+  { id: "1", title: "Prioridades Econômicas e Controle de Inflação 2026", category: "Economia", replies: 142, trending: true },
+  { id: "2", title: "Estratégias de Segurança Pública Integrada", category: "Segurança", replies: 89, trending: true },
+  { id: "3", title: "Metas Climáticas e Sustentabilidade", category: "Meio Ambiente", replies: 54, trending: false }
+];
