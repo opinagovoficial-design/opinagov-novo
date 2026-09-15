@@ -12,6 +12,7 @@ import {
   Leaf,
   ShieldCheck,
   TrendingUp,
+  Share2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { colorStyles, type Candidate } from "@/lib/poll-data"
@@ -67,6 +68,12 @@ export function CandidateCard({
         .join("")
         .toUpperCase()
     : "BR"
+
+  const handleShareCandidate = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://opinagov.vercel.app"
+    const text = `🇧🇷 *Pesquisa Eleitoral 2026 - OpinaGov*\n\nEstou acompanhando os dados e apoiando *${candidate?.name} (${candidate?.party})* no painel oficial.\n\nVeja a apuração ao vivo e declare seu apoio:\n👉 ${origin}`
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank")
+  }
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 p-4 backdrop-blur-md transition-all duration-300 hover:border-white/20">
@@ -139,13 +146,21 @@ export function CandidateCard({
         </div>
       )}
 
-      <div className="mt-4">
+      <div className="mt-4 grid grid-cols-5 gap-2">
         <Button
           onClick={() => onVote(candidate)}
-          className={`w-full font-bold py-2.5 text-sm shadow-lg ${colors.bg} hover:brightness-110 text-white border-0`}
+          className={`col-span-4 font-bold py-2.5 text-xs shadow-lg ${colors.bg} hover:brightness-110 text-white border-0`}
         >
-          Declarar Apoio Oficial — R$ 1,00
+          Apoiar — R$ 1,00
         </Button>
+        <button
+          type="button"
+          onClick={handleShareCandidate}
+          className="col-span-1 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 transition"
+          title="Compartilhar no WhatsApp"
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
       </div>
     </div>
   )

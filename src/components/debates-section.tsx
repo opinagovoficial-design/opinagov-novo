@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { useState, useEffect } from "react"
-import { ThumbsUp, ThumbsDown, Flame, Check, X, ShieldCheck } from "lucide-react"
+import { ThumbsUp, ThumbsDown, Flame, Check, X, ShieldCheck, Share2 } from "lucide-react"
 import { type Debate } from "@/lib/poll-data"
 
 interface DebatesSectionProps {
@@ -54,6 +54,12 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
     }, 1200)
   }
 
+  const handleShareWhatsApp = (debate: Debate) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://opinagov.vercel.app"
+    const text = `🗳️ *Duelo Cívico no OpinaGov*\n\n"${debate.title}"\n\nQual é a sua opinião? Vote Sim ou Não no painel oficial auditado:\n👉 ${origin}#debates`
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank")
+  }
+
   return (
     <section className="max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
@@ -63,7 +69,7 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
           </span>
           <h2 className="text-xl font-bold text-white">Guerra de Sim & Não</h2>
           <p className="text-xs text-slate-400">
-            Vote com auditoria cívica (R$ 1,00) nas principais pautas nacionais.
+            Vote com auditoria cívica (R$ 1,00) nas principais pautas e compartilhe com sua rede.
           </p>
         </div>
         <button
@@ -91,16 +97,26 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
                 <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-white/5 text-slate-300">
                   {d.category}
                 </span>
-                {d.trending && (
-                  <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-400">
-                    <Flame className="h-3 w-3" /> Em Alta
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {d.trending && (
+                    <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-400">
+                      <Flame className="h-3 w-3" /> Em Alta
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleShareWhatsApp(d)}
+                    className="flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-lg transition"
+                    title="Compartilhar duelo no WhatsApp"
+                  >
+                    <Share2 className="h-3 w-3" />
+                    WhatsApp
+                  </button>
+                </div>
               </div>
 
               <h3 className="text-sm font-semibold text-white mb-3">{d.title}</h3>
 
-              {/* Barra Proporcional */}
               <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800 flex">
                 <div
                   className="h-full bg-emerald-500 transition-all duration-500"
@@ -120,7 +136,6 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
                 <span className="text-rose-400">Não {noPct}%</span>
               </div>
 
-              {/* Botões de Voto com Taxa de R$ 1,00 */}
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <button
                   type="button"
@@ -159,7 +174,6 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
         })}
       </div>
 
-      {/* Modal de Validação Cívica / R$ 1,00 para o Duelo */}
       {pendingVote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
