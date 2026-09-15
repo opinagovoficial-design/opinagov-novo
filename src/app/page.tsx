@@ -78,6 +78,7 @@ export default function Page() {
         <SiteHeader onCreate={() => setActiveCandidate(candidates[0] || null)} />
 
         <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
+<div id="banner-anuncio" className="max-w-5xl mx-auto px-4 my-4"><div className="w-full bg-slate-900 border border-cyan-500/30 rounded-xl p-4 text-center text-xs text-slate-300 shadow-lg"><span className="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">Espaço Oficial</span>Participe do debate democrático transparente. Análise em tempo real de votos e propostas auditadas.</div></div>
           <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
           <DebatesSection
             debates={debates}
@@ -89,7 +90,7 @@ export default function Page() {
 
         <footer className="border-t border-white/10">
           <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
-            OpinaGov ÔÇö Painel Oficial de Lideran├ºas. Demonstra├º├úo sem processamento de pagamento
+            OpinaGov — Painel Oficial de Lideran├ºas. Demonstra├º├úo sem processamento de pagamento
             real.
           </div>
         </footer>
@@ -103,7 +104,7 @@ export default function Page() {
         <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-slate-950">
           <Plus className="size-4" aria-hidden="true" />
         </span>
-        Iniciar Nova Consulta C├¡vica
+        Iniciar Nova Consulta Cívica
       </button>
 
       {activeCandidate && (

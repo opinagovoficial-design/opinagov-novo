@@ -39,7 +39,7 @@ export function SiteHeader({ onCreate }: { onCreate: () => void }) {
           </Button>
         </div>
       </div>
-    </header>
+    <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 text-center text-xs text-amber-300 font-medium"><a href="/doacoes" className="underline hover:text-amber-200">Apoie a plataforma independente — Clique aqui para fazer uma doação</a></div></header>
   )
 }
 
