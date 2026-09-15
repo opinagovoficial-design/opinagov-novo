@@ -1,7 +1,7 @@
 ﻿"use client"
 
-import { useEffect, useState } from "react"
-import { X, CheckCircle2, Copy, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { X, ShieldCheck, Share2, CheckCircle2 } from "lucide-react"
 import { type Candidate } from "@/lib/poll-data"
 
 interface VoteModalProps {
@@ -11,62 +11,27 @@ interface VoteModalProps {
 }
 
 export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
-  const [copied, setCopied] = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [qrCodeImg, setQrCodeImg] = useState<string>("")
-  const [pixCopiaCola, setPixCopiaCola] = useState<string>("")
   const [voterName, setVoterName] = useState("")
   const [message, setMessage] = useState("")
-
-  useEffect(() => {
-    if (!candidate) return
-    setLoading(true)
-    fetch("/api/gerar-pix", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ candidateName: candidate.name, amount: 1.0 }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.qr_code) {
-          setPixCopiaCola(data.qr_code)
-          setQrCodeImg(data.qr_code_base64 || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_code)}`)
-        } else {
-          // Fallback para chave de suporte direto
-          const fallbackPix = "00020126580014br.gov.bcb.pix0136apoio-opinagov-202652040000530398654041.005802BR5913OPINAGOV6009SAO PAULO62070503***6304E2CA"
-          setPixCopiaCola(fallbackPix)
-          setQrCodeImg(`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(fallbackPix)}`)
-        }
-      })
-      .catch(() => {
-        const fallbackPix = "00020126580014br.gov.bcb.pix0136apoio-opinagov-202652040000530398654041.005802BR5913OPINAGOV6009SAO PAULO62070503***6304E2CA"
-        setPixCopiaCola(fallbackPix)
-        setQrCodeImg(`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(fallbackPix)}`)
-      })
-      .finally(() => setLoading(false))
-  }, [candidate])
+  const [step, setStep] = useState<"form" | "share">("form")
 
   if (!candidate) return null
 
-  const handleCopy = () => {
-    if (!pixCopiaCola) return
-    navigator.clipboard.writeText(pixCopiaCola)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 3000)
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault()
+    onConfirm({ name: voterName || "Eleitor Verificado", message })
+    setStep("share")
   }
 
-  const handleFinalize = (e: React.FormEvent) => {
-    e.preventDefault()
-    onConfirm({ name: voterName || "Eleitor Anônimo", message })
-    setConfirmed(true)
-    setTimeout(() => {
-      onClose()
-    }, 1500)
+  const handleWhatsAppShare = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://opinagov.vercel.app"
+    const text = `🚨 *URGENTE: CONSULTA POPULAR 2026*\n\nAcabei de registrar meu apoio auditado a *${candidate.name} (${candidate.party} #${candidate.ballotNumber})* no painel oficial do OpinaGov.\n\nA apuração está acontecendo em tempo real e a disputa está acirrada! Não deixe de manifestar a sua voz:\n\n👉 *Participe e vote agora:* ${origin}`
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank")
+    onClose()
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
       <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
         <button
           type="button"
@@ -76,74 +41,65 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
           <X className="h-5 w-5" />
         </button>
 
-        {confirmed ? (
-          <div className="flex flex-col items-center py-8 text-center">
-            <CheckCircle2 className="h-16 w-16 text-emerald-400 mb-3" />
-            <h3 className="text-xl font-bold text-white">Apoio Registrado!</h3>
-            <p className="text-xs text-slate-400 mt-1">Seu voto foi computado com sucesso no painel auditado.</p>
-          </div>
-        ) : (
+        {step === "form" ? (
           <div>
             <div className="text-center mb-4">
-              <h3 className="text-lg font-bold text-white">Declarar Apoio Oficial</h3>
+              <span className="inline-block bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase mb-2">
+                Auditoria Cívica Oficial
+              </span>
+              <h3 className="text-lg font-bold text-white">Declarar Apoio ao Candidato</h3>
               <p className="text-xs text-cyan-400 font-semibold mt-0.5">
-                Candidato(a): {candidate.name} ({candidate.party})
+                {candidate.name} ({candidate.party} #{candidate.ballotNumber})
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-3 bg-slate-950/70 p-4 rounded-xl border border-white/5">
-              {loading ? (
-                <div className="h-40 flex flex-col items-center justify-center gap-2">
-                  <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-                  <span className="text-xs text-slate-400">Gerando cobrança Pix oficial...</span>
-                </div>
-              ) : (
-                <>
-                  <div className="bg-white p-2.5 rounded-lg shadow">
-                    <img src={qrCodeImg} alt="QR Code Pix" className="w-36 h-36 object-contain" />
-                  </div>
-                  <div className="text-center">
-                    <span className="text-xs font-semibold text-emerald-400">Taxa cívica de R$ 1,00</span>
-                    <p className="text-[11px] text-slate-400">Escaneie no app do seu banco ou use o Copia e Cola:</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="flex items-center justify-center gap-1.5 w-full py-2.5 px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                    {copied ? "Código Pix Copiado!" : "Copiar Código Pix"}
-                  </button>
-                </>
-              )}
+            <div className="flex items-center gap-3 bg-slate-950/70 p-3 rounded-xl border border-white/10 mb-4">
+              <ShieldCheck className="h-8 w-8 text-emerald-400 shrink-0" />
+              <div className="text-xs text-slate-300">
+                <span className="font-bold text-white block">Taxa de Validação: R$ 1,00</span>
+                Mecanismo de proteção e integridade contra robôs e duplicação.
+              </div>
             </div>
 
-            <form onSubmit={handleFinalize} className="mt-4 flex flex-col gap-2.5">
+            <form onSubmit={handleNext} className="flex flex-col gap-2.5">
               <input
                 type="text"
-                placeholder="Seu nome ou apelido (opcional)"
+                placeholder="Seu nome ou apelido público"
                 value={voterName}
                 onChange={(e) => setVoterName(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-500"
               />
-              <input
-                type="text"
-                placeholder="Deixe um recado público de apoio..."
+              <textarea
+                placeholder="Deixe uma cobrança ou mensagem ao candidato..."
+                rows={3}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-500"
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-500 resize-none"
               />
               <button
                 type="submit"
-                className="w-full mt-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition"
+                className="w-full mt-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs transition shadow-lg"
               >
-                Já realizei o Pix — Confirmar Voto
+                Confirmar e Validar Apoio Cívico
               </button>
             </form>
-
-            <p className="text-[10px] text-slate-500 text-center mt-3">
-              Processamento seguro e auditado via Mercado Pago.
+          </div>
+        ) : (
+          <div className="text-center py-3">
+            <CheckCircle2 className="h-14 w-14 text-emerald-400 mx-auto mb-3 animate-bounce" />
+            <h3 className="text-lg font-bold text-white">Apoio Registrado com Sucesso!</h3>
+            <p className="text-xs text-slate-300 mt-2 mb-5 leading-relaxed">
+              Para autenticar sua manifestação no painel de transparência, <strong>compartilhe sua posição no WhatsApp</strong> e convoque mais eleitores.
             </p>
+
+            <button
+              type="button"
+              onClick={handleWhatsAppShare}
+              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-sm transition shadow-xl flex items-center justify-center gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              Compartilhar no WhatsApp para Validar
+            </button>
           </div>
         )}
       </div>
