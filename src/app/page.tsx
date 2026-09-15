@@ -1,174 +1,195 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+
+interface Candidato {
+  id: string;
+  nome: string;
+  cargo: string;
+  partido: string;
+  numero: string;
+  votos: number;
+  corBg: string;
+}
+
+const candidatosIniciais: Candidato[] = [
+  { id: '1', nome: 'Luiz Inácio Lula da Silva', cargo: 'Presidência da República', partido: 'PT', numero: '13', votos: 28, corBg: 'bg-red-500' },
+  { id: '2', nome: 'Flávio Bolsonaro', cargo: 'Presidência da República', partido: 'PL', numero: '22', votos: 27, corBg: 'bg-emerald-500' },
+  { id: '3', nome: 'Ronaldo Caiado', cargo: 'Presidência da República', partido: 'UNIÃO', numero: '44', votos: 23, corBg: 'bg-amber-500' },
+  { id: '4', nome: 'Romeu Zema', cargo: 'Presidência da República', partido: 'NOVO', numero: '30', votos: 22, corBg: 'bg-orange-500' },
+];
 
 export default function HomePage() {
-  const [candidatos, setCandidatos] = useState([
-    { id: 1, nome: 'Luiz Inácio Lula da Silva', partido: 'PT • Nº 13', cargo: 'Presidência da República', votos: 28, liderando: true, cor: 'from-emerald-500 to-teal-600', corBg: 'bg-emerald-500' },
-    { id: 2, nome: 'Flávio Bolsonaro', partido: 'PL • Nº 22', cargo: 'Presidência da República', votos: 27, liderando: false, cor: 'from-cyan-500 to-blue-600', corBg: 'bg-cyan-500' },
-    { id: 3, nome: 'Ronaldo Caiado', partido: 'PSD • Nº 55', cargo: 'Presidência da República', votos: 23, liderando: false, cor: 'from-amber-500 to-orange-600', corBg: 'bg-amber-500' },
-    { id: 4, nome: 'Romeu Zema', partido: 'NOVO • Nº 30', cargo: 'Presidência da República', votos: 22, liderando: false, cor: 'from-purple-500 to-indigo-600', corBg: 'bg-purple-500' },
-  ]);
+  const [candidatos] = useState<Candidato[]>(candidatosIniciais);
+  const [carregando, setCarregando] = useState(false);
+  const [pixData, setPixData] = useState<{
+    candidato: string;
+    qr_code: string;
+    qr_code_base64: string;
+  } | null>(null);
+  const [copiado, setCopiado] = useState(false);
+
+  const handleApoiar = async (candidato: Candidato) => {
+    try {
+      setCarregando(true);
+      const res = await fetch('/api/gerar-pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          valor: 1.0,
+          candidato: candidato.nome,
+          email: 'contato@opinagov.org',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Erro ao gerar Pix');
+        return;
+      }
+
+      setPixData({
+        candidato: candidato.nome,
+        qr_code: data.qr_code,
+        qr_code_base64: data.qr_code_base64,
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Falha ao conectar com o servidor para gerar Pix.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const copiarPix = () => {
+    if (pixData?.qr_code) {
+      navigator.clipboard.writeText(pixData.qr_code);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 3000);
+    }
+  };
 
   return (
-    <main className="min-h-screen bg-[#070b14] text-slate-100 selection:bg-cyan-500 selection:text-black">
-      {/* Top Banner de Transparência */}
-      <div className="bg-[#0b1324] border-b border-slate-800/80 px-4 py-2 text-xs font-medium text-slate-400 flex flex-wrap items-center justify-between gap-2">
+    <main className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 flex flex-col items-center">
+      {/* Cabeçalho */}
+      <div className="w-full max-w-4xl flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-emerald-400">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            Último apoio registrado há pouco
-          </span>
-          <span className="hidden sm:inline text-slate-700">•</span>
-          <span className="hidden sm:inline">89.300 participações auditadas</span>
+          <div className="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center font-bold text-slate-950 text-xl">
+            🏛️
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-white tracking-tight">OpinaGov</h1>
+            <p className="text-xs text-slate-400">Painel Oficial de Lideranças & Demandas</p>
+          </div>
         </div>
-        <div>Cobertura 100% nacional</div>
+        <div className="text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-3 py-1.5 rounded-full flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Auditoria Ativa
+        </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-10">
-        {/* Header Principal */}
-        <header className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-slate-800/60">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl font-black shadow-lg shadow-cyan-950/40">
-              🏛️
-            </div>
+      <div className="w-full max-w-4xl text-center mb-10">
+        <p className="text-xs uppercase tracking-widest text-cyan-400 font-semibold mb-1">CORRIDA EM TEMPO REAL</p>
+        <h2 className="text-3xl font-extrabold text-white">Quem lidera a disputa nacional?</h2>
+        <p className="text-xs text-slate-400 mt-2">Participe declarando seu apoio oficial auditado.</p>
+      </div>
+
+      {/* Grid de Candidatos */}
+      <section className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-4">
+        {candidatos.map((cand) => (
+          <div
+            key={cand.id}
+            className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 flex flex-col justify-between shadow-lg hover:border-slate-700 transition"
+          >
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-extrabold tracking-tight">
-                  Opina <span className="text-cyan-400">Gov</span>
-                </h1>
-                <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-full">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  1.250 cidadãos online
-                </span>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="text-lg font-bold text-white">{cand.nome}</h3>
+                  <p className="text-xs text-slate-400">{cand.cargo}</p>
+                </div>
+                <span className="text-2xl font-black text-cyan-400">{cand.votos}%</span>
               </div>
-              <p className="text-xs text-slate-400">Painel de Lideranças e Demandas Populares</p>
+
+              <div className="inline-block text-[11px] font-semibold bg-slate-800 text-slate-300 px-2 py-0.5 rounded mb-4">
+                {cand.partido} • Nº {cand.numero}
+              </div>
+
+              {/* Barra de progresso */}
+              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-5">
+                <div
+                  style={{ width: `${cand.votos}%` }}
+                  className={`h-full ${cand.corBg} transition-all duration-500`}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Ações Rápidas */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/doacoes"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-bold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-950/50 flex items-center gap-2 border border-emerald-400/20 active:scale-95"
+            <button
+              type="button"
+              disabled={carregando}
+              onClick={() => handleApoiar(cand)}
+              className="w-full py-2.5 px-4 bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-slate-950 font-bold rounded-lg transition text-sm disabled:opacity-50"
             >
-              🤝 Doações Humanitárias
-            </Link>
-            <Link
-              href="/admin"
-              className="bg-white hover:bg-slate-200 text-slate-950 text-xs md:text-sm font-bold px-4 py-2.5 rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1"
-            >
-              + Criar Duelo
-            </Link>
+              {carregando ? 'Gerando Pix...' : 'Declarar Apoio Oficial — R$ 1,00'}
+            </button>
           </div>
-        </header>
+        ))}
+      </section>
 
-        {/* Bloco de Título e Disputa */}
-        <section className="space-y-6">
-          <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-              Corrida em Tempo Real
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-              Quem lidera a disputa nacional?
-            </h2>
-            <p className="text-xs md:text-sm text-slate-400">
-              89.300 votos declarados • atualizado ao vivo a cada participação.
+      {/* Modal Popup do Pix */}
+      {pixData && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-center">
+            <button
+              onClick={() => setPixData(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-xl font-bold text-white mb-1">Apoio para {pixData.candidato}</h3>
+            <p className="text-xs text-slate-400 mb-4">Valor do apoio: <strong className="text-emerald-400">R$ 1,00</strong></p>
+
+            {/* Imagem do QR Code */}
+            {pixData.qr_code_base64 ? (
+              <div className="bg-white p-3 rounded-xl inline-block mb-4 shadow-inner">
+                <img
+                  src={`data:image/png;base64,${pixData.qr_code_base64}`}
+                  alt="QR Code Pix"
+                  className="w-48 h-48 mx-auto"
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-amber-400 mb-4">Use o código Pix Copia e Cola abaixo:</p>
+            )}
+
+            {/* Campo Copia e Cola */}
+            <div className="mb-4">
+              <textarea
+                readOnly
+                rows={3}
+                value={pixData.qr_code}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-300 select-all font-mono resize-none focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={copiarPix}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition ${
+                copiado
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950'
+              }`}
+            >
+              {copiado ? '✓ Código Pix Copiado!' : 'Copiar Código Pix (Copia e Cola)'}
+            </button>
+
+            <p className="text-[11px] text-slate-400 mt-4">
+              Pagamento processado com segurança via Mercado Pago. O apoio é computado assim que confirmado.
             </p>
           </div>
-
-          {/* Barra Master da Disputa */}
-          <div className="bg-[#0b1324] border border-slate-800/80 p-5 rounded-3xl space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-300">Barra Master da Disputa</span>
-                <span className="bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-lg text-[10px] flex items-center gap-1">
-                  👑 Luiz lidera - 28%
-                </span>
-              </div>
-              <span className="text-slate-500 font-normal">Divisão proporcional dos votos</span>
-            </div>
-
-            {/* Barra Dividida */}
-            <div className="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden flex border border-slate-800">
-              <div style={{ width: '28%' }} className="bg-emerald-500 h-full"></div>
-              <div style={{ width: '27%' }} className="bg-cyan-500 h-full"></div>
-              <div style={{ width: '23%' }} className="bg-amber-500 h-full"></div>
-              <div style={{ width: '22%' }} className="bg-purple-500 h-full"></div>
-            </div>
-
-            {/* Legenda das Porcentagens */}
-            <div className="flex flex-wrap gap-4 text-xs font-semibold pt-1">
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-500"></span> Luiz 28%
-              </span>
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-cyan-500"></span> Flávio 27%
-              </span>
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-amber-500"></span> Ronaldo 23%
-              </span>
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-purple-500"></span> Romeu 22%
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* Grid de Candidatos */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {candidatos.map((cand) => (
-            <div
-              key={cand.id}
-              className="bg-[#0b1324] border border-slate-800/80 hover:border-slate-700/80 rounded-3xl p-6 transition-all shadow-xl flex flex-col justify-between space-y-6"
-            >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg md:text-xl font-extrabold text-white tracking-tight">
-                        {cand.nome}
-                      </h3>
-                      {cand.liderando && (
-                        <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
-                          Liderando
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-400">{cand.cargo}</p>
-                    <div className="mt-2 inline-block bg-slate-900 border border-slate-800 text-slate-300 text-[11px] font-semibold px-2.5 py-1 rounded-lg">
-                      {cand.partido}
-                    </div>
-                  </div>
-                  <div className="text-2xl md:text-3xl font-black text-cyan-400">
-                    {cand.votos}%
-                  </div>
-                </div>
-
-                {/* Barra de progresso individual */}
-                <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
-                  <div
-                    style={{ width: `${cand.votos}%` }}
-                    className={`h-full ${cand.corBg}`}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Botão de Apoio */}
-              <button
-                type="button"
-                className="w-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-cyan-950/40 text-sm active:scale-[0.98]"
-              >
-                Declarar Apoio Oficial — R$ 1,00
-              </button>
-            </div>
-          ))}
-        </section>
-      </div>
+        </div>
+      )}
     </main>
   );
 }
