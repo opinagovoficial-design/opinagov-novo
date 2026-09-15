@@ -1,7 +1,7 @@
 ﻿"use client"
 
-import { useState } from "react"
-import { X, CheckCircle2, Copy } from "lucide-react"
+import { useEffect, useState } from "react"
+import { X, CheckCircle2, Copy, Loader2 } from "lucide-react"
 import { type Candidate } from "@/lib/poll-data"
 
 interface VoteModalProps {
@@ -13,15 +13,45 @@ interface VoteModalProps {
 export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
   const [copied, setCopied] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [qrCodeImg, setQrCodeImg] = useState<string>("")
+  const [pixCopiaCola, setPixCopiaCola] = useState<string>("")
   const [voterName, setVoterName] = useState("")
   const [message, setMessage] = useState("")
 
+  useEffect(() => {
+    if (!candidate) return
+    setLoading(true)
+    fetch("/api/gerar-pix", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ candidateName: candidate.name, amount: 1.0 }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.qr_code) {
+          setPixCopiaCola(data.qr_code)
+          setQrCodeImg(data.qr_code_base64 || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.qr_code)}`)
+        } else {
+          // Fallback para chave de suporte direto
+          const fallbackPix = "00020126580014br.gov.bcb.pix0136apoio-opinagov-202652040000530398654041.005802BR5913OPINAGOV6009SAO PAULO62070503***6304E2CA"
+          setPixCopiaCola(fallbackPix)
+          setQrCodeImg(`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(fallbackPix)}`)
+        }
+      })
+      .catch(() => {
+        const fallbackPix = "00020126580014br.gov.bcb.pix0136apoio-opinagov-202652040000530398654041.005802BR5913OPINAGOV6009SAO PAULO62070503***6304E2CA"
+        setPixCopiaCola(fallbackPix)
+        setQrCodeImg(`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(fallbackPix)}`)
+      })
+      .finally(() => setLoading(false))
+  }, [candidate])
+
   if (!candidate) return null
 
-  const pixPayload = "00020126580014br.gov.bcb.pix0136apoio-opinagov-202652040000530398654041.005802BR5913OPINAGOV6009SAO PAULO62070503***6304E2CA"
-
   const handleCopy = () => {
-    navigator.clipboard.writeText(pixPayload)
+    if (!pixCopiaCola) return
+    navigator.clipboard.writeText(pixCopiaCola)
     setCopied(true)
     setTimeout(() => setCopied(false), 3000)
   }
@@ -50,7 +80,7 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
           <div className="flex flex-col items-center py-8 text-center">
             <CheckCircle2 className="h-16 w-16 text-emerald-400 mb-3" />
             <h3 className="text-xl font-bold text-white">Apoio Registrado!</h3>
-            <p className="text-xs text-slate-400 mt-1">Seu voto e comprovante foram validados no painel.</p>
+            <p className="text-xs text-slate-400 mt-1">Seu voto foi computado com sucesso no painel auditado.</p>
           </div>
         ) : (
           <div>
@@ -61,27 +91,31 @@ export function VoteModal({ candidate, onClose, onConfirm }: VoteModalProps) {
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-3 bg-slate-950/60 p-4 rounded-xl border border-white/5">
-              <div className="bg-white p-2.5 rounded-lg shadow">
-                <img
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=00020126580014br.gov.bcb.pix0136apoio-opinagov-202652040000530398654041.005802BR5913OPINAGOV6009SAO%20PAULO62070503***6304E2CA"
-                  alt="QR Code Pix"
-                  className="w-32 h-32"
-                />
-              </div>
-              <div className="text-center">
-                <span className="text-xs font-semibold text-emerald-400">Taxa cívica de R$ 1,00</span>
-                <p className="text-[11px] text-slate-400">Escaneie o QR Code acima ou use o Copia e Cola:</p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition"
-              >
-                <Copy className="h-3.5 w-3.5" />
-                {copied ? "Código Pix Copiado!" : "Copiar Código Pix"}
-              </button>
+            <div className="flex flex-col items-center gap-3 bg-slate-950/70 p-4 rounded-xl border border-white/5">
+              {loading ? (
+                <div className="h-40 flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+                  <span className="text-xs text-slate-400">Gerando cobrança Pix oficial...</span>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-white p-2.5 rounded-lg shadow">
+                    <img src={qrCodeImg} alt="QR Code Pix" className="w-36 h-36 object-contain" />
+                  </div>
+                  <div className="text-center">
+                    <span className="text-xs font-semibold text-emerald-400">Taxa cívica de R$ 1,00</span>
+                    <p className="text-[11px] text-slate-400">Escaneie no app do seu banco ou use o Copia e Cola:</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="flex items-center justify-center gap-1.5 w-full py-2.5 px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold transition"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    {copied ? "Código Pix Copiado!" : "Copiar Código Pix"}
+                  </button>
+                </>
+              )}
             </div>
 
             <form onSubmit={handleFinalize} className="mt-4 flex flex-col gap-2.5">

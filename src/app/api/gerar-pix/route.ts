@@ -1,31 +1,44 @@
-﻿import { NextResponse } from "next/server";
-import { MercadoPagoConfig, Payment } from "mercadopago";
+﻿import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
   try {
-    const { valor, candidatoNome } = await req.json();
+    const body = await req.json()
+    const { candidateName, amount = 1.0 } = body
 
-    const token = process.env.MERCADOPAGO_ACCESS_TOKEN || "APP_USR-6776100155239106-031215-68045f492b45fcf30f81fe80b95ebc98-1726715694";
-    const client = new MercadoPagoConfig({ accessToken: token });
-    const payment = new Payment(client);
+    const token = process.env.MERCADO_PAGO_ACCESS_TOKEN || "APP_USR-759617489299179-091500-6b226b1d2b56a9281533b6ed6ddfddb7-3691454176"
 
-    const body = {
-      transaction_amount: Number(valor) || 1.0,
-      description: `Apoio Oficial OpinaGov - ${candidatoNome || "Candidato"}`,
-      payment_method_id: "pix",
-      payer: {
-        email: "apoio@opinagov.com.br",
+    const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "X-Idempotency-Key": `${Date.now()}-${Math.random()}`,
       },
-    };
+      body: JSON.stringify({
+        transaction_amount: Number(amount),
+        description: `Apoio Civico Oficial - ${candidateName || "OpinaGov"}`,
+        payment_method_id: "pix",
+        payer: {
+          email: "eleitor.opinagov@gmail.com",
+          first_name: "Apoiador",
+          last_name: "Civico",
+        },
+      }),
+    })
 
-    const response = await payment.create({ body });
+    const data = await mpRes.json()
 
-    return NextResponse.json({
-      qr_code: response.point_of_interaction?.transaction_data?.qr_code,
-      qr_code_base64: response.point_of_interaction?.transaction_data?.qr_code_base64,
-    });
-  } catch (error: any) {
-    console.error("Erro na criacao do Pix:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (data.point_of_interaction?.transaction_data) {
+      const { qr_code, qr_code_base64 } = data.point_of_interaction.transaction_data
+      return NextResponse.json({
+        id: data.id,
+        qr_code,
+        qr_code_base64: `data:image/png;base64,${qr_code_base64}`,
+      })
+    }
+
+    return NextResponse.json({ error: "Falha ao gerar Pix", details: data }, { status: 400 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

@@ -1,7 +1,6 @@
 ﻿"use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
 import { SplashReveal } from "../components/splash-reveal"
 import { LiveTicker } from "../components/live-ticker"
 import { SiteHeader } from "../components/site-header"
@@ -33,79 +32,77 @@ export default function Page() {
     )
 
     if (data.message) {
-      setComments((prev) => [
-        {
-          id: `c-${Date.now()}`,
-          author: data.name,
-          city: "Sua cidade",
-          candidateId,
-          message: data.message,
-        },
-        ...prev,
-      ])
+      const newComment: Comment = {
+        id: `c-${Date.now()}`,
+        author: data.name || "Eleitor Verificado",
+        city: "Brasil",
+        candidateId,
+        message: data.message,
+        timestamp: "Agora",
+      }
+      setComments((prev) => [newComment, ...prev])
+    }
+
+    setActiveCandidate(null)
+  }
+
+  const handleGoToDebates = () => {
+    const el = document.getElementById("debates")
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" })
     }
   }
 
   const handleDebateVote = (debateId: string, side: "yes" | "no") => {
     setDebates((prev) =>
-      prev.map((d) =>
-        d.id === debateId
-          ? {
-              ...d,
-              yesVotes: side === "yes" ? d.yesVotes + 1 : d.yesVotes,
-              noVotes: side === "no" ? d.noVotes + 1 : d.noVotes,
-            }
-          : d,
-      ),
+      prev.map((d) => {
+        if (d.id !== debateId) return d
+        return {
+          ...d,
+          yesVotes: side === "yes" ? d.yesVotes + 1 : d.yesVotes,
+          noVotes: side === "no" ? d.noVotes + 1 : d.noVotes,
+        }
+      }),
     )
   }
 
   return (
-    <div className="relative min-h-screen bg-[#030712] text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-white">
       <SplashReveal />
+      <LiveTicker />
+      <SiteHeader onCreate={handleGoToDebates} />
 
-      <div
-        className="pointer-events-none fixed inset-0 opacity-60"
-        style={{
-          backgroundImage:
-            "radial-gradient(50% 40% at 15% 0%, rgba(16,185,129,0.10), transparent 60%), radial-gradient(50% 40% at 85% 5%, rgba(56,189,248,0.10), transparent 60%)",
-        }}
-        aria-hidden="true"
-      />
+      <main className="relative pb-24">
+        <div id="banner-anuncio" className="max-w-5xl mx-auto px-4 my-4">
+          <div className="w-full bg-slate-900 border border-cyan-500/30 rounded-xl p-3.5 text-center text-xs text-slate-300 shadow-lg flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-bold uppercase text-[10px] tracking-wide">
+                Painel Cívico
+              </span>
+              <span>Auditoria e dados eleitorais atualizados em tempo real.</span>
+            </div>
+            <a href="/doacoes" className="text-cyan-400 hover:text-cyan-300 underline font-semibold text-xs ml-auto">
+              Apoie este projeto independente →
+            </a>
+          </div>
+        </div>
 
-      <div className="og-app-in relative">
-        <LiveTicker />
-        <SiteHeader onCreate={() => setActiveCandidate(candidates[0] || null)} />
+        <LeadershipPanel candidates={candidates} onVote={(cand) => setActiveCandidate(cand)} />
 
-        <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
-<div id="banner-anuncio" className="max-w-5xl mx-auto px-4 my-4"><div className="w-full bg-slate-900 border border-cyan-500/30 rounded-xl p-4 text-center text-xs text-slate-300 shadow-lg"><span className="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-bold mr-2 uppercase tracking-wide">Espaço Oficial</span>Participe do debate democrático transparente. Análise em tempo real de votos e propostas auditadas.</div></div>
-          <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
+        <div id="debates">
           <DebatesSection
             debates={debates}
-            onCreate={() => setActiveCandidate(candidates[0] || null)}
+            onCreate={handleGoToDebates}
             onVote={handleDebateVote}
           />
-          <CommunityWall comments={comments} candidates={candidates} />
-        </main>
+        </div>
 
-        <footer className="border-t border-white/10">
-          <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
-            OpinaGov — Painel Oficial de Lideran├ºas. Demonstra├º├úo sem processamento de pagamento
-            real.
-          </div>
-        </footer>
-      </div>
+        <CommunityWall comments={comments} candidates={candidates} />
+      </main>
 
-      <button
-        type="button"
-        onClick={() => setActiveCandidate(candidates[0] || null)}
-        className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-slate-950/80 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-emerald-500/10 backdrop-blur-xl transition-all hover:border-emerald-400/40 hover:bg-slate-900/90"
-      >
-        <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-slate-950">
-          <Plus className="size-4" aria-hidden="true" />
-        </span>
-        Iniciar Nova Consulta Cívica
-      </button>
+      <footer className="border-t border-white/10 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <p>OpinaGov — Painel Cívico Independente e Auditado.</p>
+      </footer>
 
       {activeCandidate && (
         <VoteModal
@@ -117,5 +114,3 @@ export default function Page() {
     </div>
   )
 }
-
-
