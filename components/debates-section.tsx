@@ -1,7 +1,7 @@
 ﻿"use client"
 
 import { useState, useEffect } from "react"
-import { ThumbsUp, ThumbsDown, MessageSquare, Flame, Check } from "lucide-react"
+import { ThumbsUp, ThumbsDown, Flame, Check, X, ShieldCheck } from "lucide-react"
 import { type Debate } from "@/lib/poll-data"
 
 interface DebatesSectionProps {
@@ -10,8 +10,16 @@ interface DebatesSectionProps {
   onVote: (debateId: string, side: "yes" | "no") => void
 }
 
+interface PendingDebateVote {
+  debateId: string
+  side: "yes" | "no"
+  debateTitle: string
+}
+
 export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProps) {
   const [votedMap, setVotedMap] = useState<Record<string, "yes" | "no">>({})
+  const [pendingVote, setPendingVote] = useState<PendingDebateVote | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
 
   useEffect(() => {
     try {
@@ -20,16 +28,30 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
     } catch {}
   }, [])
 
-  const handleCastVote = (debateId: string, side: "yes" | "no") => {
-    if (votedMap[debateId]) return
+  const handleOpenPaywall = (debate: Debate, side: "yes" | "no") => {
+    if (votedMap[debate.id]) return
+    setPendingVote({ debateId: debate.id, side, debateTitle: debate.title })
+  }
 
+  const handleConfirmPixVote = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!pendingVote) return
+
+    const { debateId, side } = pendingVote
     const next = { ...votedMap, [debateId]: side }
     setVotedMap(next)
+
     try {
       localStorage.setItem("opinagov_debates_voted", JSON.stringify(next))
     } catch {}
 
     onVote(debateId, side)
+    setConfirmed(true)
+
+    setTimeout(() => {
+      setConfirmed(false)
+      setPendingVote(null)
+    }, 1200)
   }
 
   return (
@@ -40,7 +62,9 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
             Duelos Cívicos em Alta
           </span>
           <h2 className="text-xl font-bold text-white">Guerra de Sim & Não</h2>
-          <p className="text-xs text-slate-400">Vote diretamente nas principais pautas e propostas nacionais.</p>
+          <p className="text-xs text-slate-400">
+            Vote com auditoria cívica (R$ 1,00) nas principais pautas nacionais.
+          </p>
         </div>
         <button
           type="button"
@@ -91,17 +115,17 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
               <div className="flex items-center justify-between text-xs font-bold mt-2 text-slate-300">
                 <span className="text-emerald-400">Sim {yesPct}%</span>
                 <span className="text-[11px] font-normal text-slate-400">
-                  {total.toLocaleString("pt-BR")} votos
+                  {total.toLocaleString("pt-BR")} votos auditados
                 </span>
                 <span className="text-rose-400">Não {noPct}%</span>
               </div>
 
-              {/* Botões de Ação com Trava contra Duplo Clique */}
+              {/* Botões de Voto com Taxa de R$ 1,00 */}
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <button
                   type="button"
                   disabled={Boolean(userChoice)}
-                  onClick={() => handleCastVote(d.id, "yes")}
+                  onClick={() => handleOpenPaywall(d, "yes")}
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border transition ${
                     userChoice === "yes"
                       ? "bg-emerald-600 border-emerald-400 text-white shadow-md cursor-not-allowed"
@@ -111,13 +135,13 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
                   }`}
                 >
                   {userChoice === "yes" ? <Check className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />}
-                  {userChoice === "yes" ? "Voto Computado (Sim)" : "Sim"}
+                  {userChoice === "yes" ? "Voto Confirmado (Sim)" : "Votar Sim (R$ 1,00)"}
                 </button>
 
                 <button
                   type="button"
                   disabled={Boolean(userChoice)}
-                  onClick={() => handleCastVote(d.id, "no")}
+                  onClick={() => handleOpenPaywall(d, "no")}
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border transition ${
                     userChoice === "no"
                       ? "bg-rose-600 border-rose-400 text-white shadow-md cursor-not-allowed"
@@ -127,13 +151,73 @@ export function DebatesSection({ debates, onCreate, onVote }: DebatesSectionProp
                   }`}
                 >
                   {userChoice === "no" ? <Check className="h-4 w-4" /> : <ThumbsDown className="h-4 w-4" />}
-                  {userChoice === "no" ? "Voto Computado (Não)" : "Não"}
+                  {userChoice === "no" ? "Voto Confirmado (Não)" : "Votar Não (R$ 1,00)"}
                 </button>
               </div>
             </div>
           )
         })}
       </div>
+
+      {/* Modal de Validação Cívica / R$ 1,00 para o Duelo */}
+      {pendingVote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setPendingVote(null)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {confirmed ? (
+              <div className="flex flex-col items-center py-8 text-center">
+                <Check className="h-16 w-16 text-emerald-400 mb-3" />
+                <h3 className="text-xl font-bold text-white">Voto Registrado!</h3>
+                <p className="text-xs text-slate-400 mt-1">Sua manifestação foi computada com sucesso.</p>
+              </div>
+            ) : (
+              <div>
+                <div className="text-center mb-4">
+                  <h3 className="text-lg font-bold text-white">Confirmar Voto no Duelo</h3>
+                  <p className="text-xs text-slate-300 mt-1 line-clamp-2">"{pendingVote.debateTitle}"</p>
+                  <span
+                    className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold ${
+                      pendingVote.side === "yes"
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                        : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                    }`}
+                  >
+                    Opção selecionada: {pendingVote.side === "yes" ? "SIM" : "NÃO"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-cyan-500/20 mb-4">
+                  <ShieldCheck className="h-8 w-8 text-cyan-400 shrink-0" />
+                  <div className="text-xs text-slate-300">
+                    <span className="font-bold text-white block">Taxa Cívica de R$ 1,00</span>
+                    Mecanismo anti-bot para garantir votos únicos e auditáveis.
+                  </div>
+                </div>
+
+                <form onSubmit={handleConfirmPixVote} className="flex flex-col gap-3">
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition shadow-lg"
+                  >
+                    Confirmar Voto Auditado (R$ 1,00)
+                  </button>
+                </form>
+
+                <p className="text-[10px] text-slate-500 text-center mt-3">
+                  Auditoria de participação via OpinaGov.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   )
 }
