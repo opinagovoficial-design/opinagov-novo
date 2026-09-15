@@ -1,50 +1,118 @@
-'use client';
+﻿"use client"
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from "react"
+import { Plus } from "lucide-react"
+import { SplashReveal } from "@/components/splash-reveal"
+import { LiveTicker } from "@/components/live-ticker"
+import { SiteHeader } from "@/components/site-header"
+import { LeadershipPanel } from "@/components/leadership-panel"
+import { VoteModal } from "@/components/vote-modal"
+import { CommunityWall } from "@/components/community-wall"
+import { DebatesSection } from "@/components/debates-section"
+import {
+  initialCandidates,
+  initialComments,
+  initialDebates,
+  type Candidate,
+  type Comment,
+  type Debate,
+} from "@/lib/poll-data"
 
-export default function HomePage() {
+export default function Page() {
+  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates)
+  const [comments, setComments] = useState<Comment[]>(initialComments)
+  const [debates, setDebates] = useState<Debate[]>(initialDebates)
+  const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(null)
+
+  const handleConfirm = (data: { name: string; message: string }) => {
+    if (!activeCandidate) return
+    const candidateId = activeCandidate.id
+
+    setCandidates((prev) =>
+      prev.map((c) => (c.id === candidateId ? { ...c, votes: c.votes + 1 } : c)),
+    )
+
+    if (data.message) {
+      setComments((prev) => [
+        {
+          id: `c-${Date.now()}`,
+          author: data.name,
+          city: "Sua cidade",
+          candidateId,
+          message: data.message,
+        },
+        ...prev,
+      ])
+    }
+  }
+
+  const handleDebateVote = (debateId: string, side: "yes" | "no") => {
+    setDebates((prev) =>
+      prev.map((d) =>
+        d.id === debateId
+          ? {
+              ...d,
+              yesVotes: side === "yes" ? d.yesVotes + 1 : d.yesVotes,
+              noVotes: side === "no" ? d.noVotes + 1 : d.noVotes,
+            }
+          : d,
+      ),
+    )
+  }
+
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 md:p-12">
-      <div className="max-w-4xl mx-auto space-y-8">
-        
-        {/* Cabeçalho com Botão de Doações */}
-        <div className="flex flex-col md:flex-row justify-between items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl gap-4 shadow-xl">
-          <div>
-            <span className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Painel Oficial
-            </span>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-2">
-              Opina <span className="text-emerald-400">Gov</span>
-            </h1>
-            <p className="text-slate-400 text-sm">Plataforma de Engajamento Cívico e Ação Social</p>
+    <div className="relative min-h-screen bg-[#030712] text-white">
+      <SplashReveal />
+
+      <div
+        className="pointer-events-none fixed inset-0 opacity-60"
+        style={{
+          backgroundImage:
+            "radial-gradient(50% 40% at 15% 0%, rgba(16,185,129,0.10), transparent 60%), radial-gradient(50% 40% at 85% 5%, rgba(56,189,248,0.10), transparent 60%)",
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="og-app-in relative">
+        <LiveTicker />
+        <SiteHeader onCreate={() => setActiveCandidate(candidates[0])} />
+
+        <main className="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-8 sm:px-6 sm:py-12">
+          <LeadershipPanel candidates={candidates} onVote={setActiveCandidate} />
+          <DebatesSection
+            debates={debates}
+            onCreate={() => setActiveCandidate(candidates[0])}
+            onVote={handleDebateVote}
+          />
+          <CommunityWall comments={comments} candidates={candidates} />
+        </main>
+
+        <footer className="border-t border-white/10">
+          <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
+            OpinaGov ÔÇö Painel Oficial de Lideran├ºas. Demonstra├º├úo sem processamento de pagamento
+            real.
           </div>
-
-          <Link 
-            href="/doacoes" 
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-emerald-900/40 flex items-center gap-2"
-          >
-            🤝 Doações Humanitárias
-          </Link>
-        </div>
-
-        {/* Banner Principal / Corrida em Tempo Real */}
-        <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-3xl text-center space-y-4">
-          <h2 className="text-3xl font-extrabold tracking-tight">Quem lidera a disputa nacional?</h2>
-          <p className="text-slate-400 text-sm max-w-lg mx-auto">
-            Participe das votações auditadas e ajude a construir novos rumos para a governança e o apoio comunitário.
-          </p>
-          <div className="pt-4">
-            <Link
-              href="/admin"
-              className="inline-block bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-6 py-2.5 rounded-xl border border-slate-700 transition-all"
-            >
-              Acessar Painel Administrativo ⚙️
-            </Link>
-          </div>
-        </div>
-
+        </footer>
       </div>
-    </main>
-  );
+
+      <button
+        type="button"
+        onClick={() => setActiveCandidate(candidates[0])}
+        className="fixed bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-slate-950/80 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-emerald-500/10 backdrop-blur-xl transition-all hover:border-emerald-400/40 hover:bg-slate-900/90"
+      >
+        <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-slate-950">
+          <Plus className="size-4" aria-hidden="true" />
+        </span>
+        Iniciar Nova Consulta C├¡vica
+      </button>
+
+      {activeCandidate && (
+        <VoteModal
+          candidate={activeCandidate}
+          onClose={() => setActiveCandidate(null)}
+          onConfirm={handleConfirm}
+        />
+      )}
+    </div>
+  )
 }
