@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
-import { SplashReveal } from "@/components/splash-reveal"
-import { LiveTicker } from "@/components/live-ticker"
-import { SiteHeader } from "@/components/site-header"
-import { LeadershipPanel } from "@/components/leadership-panel"
-import { VoteModal } from "@/components/vote-modal"
-import { CommunityWall } from "@/components/community-wall"
-import { DebatesSection } from "@/components/debates-section"
+import { SplashReveal } from "../components/splash-reveal"
+import { LiveTicker } from "../components/live-ticker"
+import { SiteHeader } from "../components/site-header"
+import { LeadershipPanel } from "../components/leadership-panel"
+import { VoteModal } from "../components/vote-modal"
+import { CommunityWall } from "../components/community-wall"
+import { DebatesSection } from "../components/debates-section"
 import {
   initialCandidates,
   initialComments,
@@ -116,3 +116,4 @@ export default function Page() {
     </div>
   )
 }
+
