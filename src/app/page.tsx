@@ -301,6 +301,7 @@ export default function Page() {
 
       <footer className="border-t border-white/10 bg-slate-950 py-6 text-center text-xs text-slate-500">
         <p>OpinaGov — Painel Cívico Independente e Auditado.</p>
+        <div className="mt-2 text-center"><a href="/admin" className="text-[10px] text-slate-700 hover:text-slate-500 transition">Painel de Gestão</a></div>
       </footer>
 
       {activeCandidate && (
@@ -598,3 +599,4 @@ export default function Page() {
     </div>
   )
 }
+
