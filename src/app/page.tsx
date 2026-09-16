@@ -1,5 +1,6 @@
 ﻿"use client"
 
+import { LgpdFooterModal } from "../components/lgpd-modal"
 import { useState, useEffect } from "react"
 import { SplashReveal } from "../components/splash-reveal"
 import { LiveTicker } from "../components/live-ticker"
@@ -41,6 +42,14 @@ interface ActiveBanner {
 }
 
 export default function Page() {
+  useEffect(() => {
+    try {
+      const storedCand = localStorage.getItem("opinagov_candidates")
+      if (storedCand) {
+        setCandidates(JSON.parse(storedCand))
+      }
+    } catch {}
+  }, [])
   const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates)
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [debates, setDebates] = useState<Debate[]>(initialDebates)
@@ -303,6 +312,7 @@ export default function Page() {
         <p>OpinaGov — Painel Cívico Independente e Auditado.</p>
         <div className="mt-2 text-center"><a href="/admin" className="text-[10px] text-slate-700 hover:text-slate-500 transition">Painel de Gestão</a></div>
       </footer>
+      <LgpdFooterModal />
 
       {activeCandidate && (
         <VoteModal
@@ -599,4 +609,5 @@ export default function Page() {
     </div>
   )
 }
+
 
