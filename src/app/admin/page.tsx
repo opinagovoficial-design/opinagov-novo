@@ -25,6 +25,29 @@ import {
 
 export default function AdminPage() {
 
+  const handleCreateNewDuelDirect = async (categoryVal: string, titleVal: string, yesVal: number = 0, noVal: number = 0) => {
+    try {
+      const res = await fetch("/api/duels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          category: categoryVal,
+          title: titleVal,
+          votesYes: yesVal,
+          votesNo: noVal
+        })
+      });
+      if (res.ok) {
+        alert("✅ Pergunta publicada no site com sucesso!");
+        window.location.reload();
+      }
+    } catch {
+      alert("Erro ao conectar à API de duelos.");
+    }
+  };
+
+
   const handleSaveDirectVotes = async (pollId: any, simId: string, naoId: string) => {
     try {
       const simInput = document.getElementById(simId) as HTMLInputElement | null;
