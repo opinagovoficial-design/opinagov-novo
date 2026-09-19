@@ -25,6 +25,10 @@ export interface Comment {
   candidateId: string;
   message: string;
   timestamp?: string;
+
+  targetCandidate?: string;
+  candidate?: string;
+  auditTier?: string;
 }
 
 export interface Debate {
@@ -329,27 +333,63 @@ export const initialDebates: Debate[] = [
 
 export const initialComments: Comment[] = [
   {
-    id: "c-1",
-    author: "Carlos M.",
-    city: "São Paulo, SP",
-    candidateId: "flavio-bolsonaro",
-    message: "Apoio pela agenda de liberdade econômica e reformas.",
-    timestamp: "Há 10 min",
+    id: "cm-1",
+    candidateId: "cand-lula",
+    author: "Carlos E. M.",
+    city: "Ribeirão Preto, SP",
+    message: "Vergonha total o rombo nas contas e essa enxurrada de novos impostos! A conta sempre sobra pro trabalhador pagar.",
+    targetCandidate: "Luiz Inácio Lula da Silva (BRASIL PRONTO PRA MAIS)",
+    timestamp: "Há 3 min",
+    auditTier: "Pix R$ 5,00 Auditado"
   },
   {
-    id: "c-2",
-    author: "Ana Paula R.",
+    id: "cm-2",
+    candidateId: "cand-flavio",
+    author: "Juliana Rocha",
+    city: "Recife, PE",
+    message: "Querer dar lição de moral agora com esse histórico vergonhoso é piada pronta. O país precisa de emprego e comida na mesa, não de bravata!",
+    targetCandidate: "Flávio Nantes Bolsonaro (PL)",
+    timestamp: "Há 7 min",
+    auditTier: "Pix R$ 5,00 Auditado"
+  },
+  {
+    id: "cm-3",
+    candidateId: "cand-caiado",
+    author: "Rodrigo F.",
     city: "Belo Horizonte, MG",
-    candidateId: "lula",
-    message: "Foco prioritário na estabilidade social e programas básicos.",
-    timestamp: "Há 18 min",
+    message: "A segurança pública desse país virou terra sem lei. Falta pulso firme e respeito à polícia, chega de passar pano pra bandido!",
+    targetCandidate: "Ronaldo Ramos Caiado (PSD)",
+    timestamp: "Há 12 min",
+    auditTier: "Pix R$ 5,00 Auditado"
   },
   {
-    id: "c-3",
-    author: "Marcos V.",
-    city: "Goiânia, GO",
-    candidateId: "ronaldo-caiado",
-    message: "A experiência na segurança pública de Goiás é a referência.",
-    timestamp: "Há 32 min",
+    id: "cm-4",
+    candidateId: "cand-tarcisio",
+    author: "Mariana S.",
+    city: "Curitiba, PR",
+    message: "O Brasil virou refém de torcida de futebol ideológica. Enquanto militante briga por político de estimação, a saúde básica continua sucateada!",
+    targetCandidate: "Tarcísio Gomes de Freitas (REPUBLICANOS)",
+    timestamp: "Há 18 min",
+    auditTier: "Pix R$ 5,00 Auditado"
   },
+  {
+    id: "cm-5",
+    candidateId: "cand-zema",
+    author: "Eduardo Lima",
+    city: "Goiânia, GO",
+    message: "Prometem enxugar a máquina pública na campanha e no primeiro mês já tão negociando ministério e cargo de indicação. Sistema podre!",
+    targetCandidate: "Romeu Zema (NOVO)",
+    timestamp: "Há 24 min",
+    auditTier: "Pix R$ 5,00 Auditado"
+  },
+  {
+    id: "cm-6",
+    candidateId: "cand-lula",
+    author: "Renato D.",
+    city: "Porto Alegre, RS",
+    message: "A economia só anda de lado e a inflação real no mercado tá sufocando todo mundo. Não adianta inventar narrativa!",
+    targetCandidate: "Luiz Inácio Lula da Silva (BRASIL PRONTO PRA MAIS)",
+    timestamp: "Há 31 min",
+    auditTier: "Pix R$ 5,00 Auditado"
+  }
 ];
