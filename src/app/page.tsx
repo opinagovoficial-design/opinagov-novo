@@ -43,6 +43,20 @@ interface ActiveBanner {
 
 export default function Page() {
 
+  const [masterDuels, setMasterDuels] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/duels")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setMasterDuels(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+  
+
   const [civicDuels, setCivicDuels] = useState<any[]>([]);
 
   useEffect(() => {

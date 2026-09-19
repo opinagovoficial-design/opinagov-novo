@@ -25,6 +25,30 @@ import {
 
 export default function AdminPage() {
 
+  const handleMasterVoteUpdate = async (id: string, simVal: any, naoVal: any) => {
+    try {
+      const res = await fetch("/api/duels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_votes",
+          duelId: id,
+          votesYes: Number(simVal) || 0,
+          votesNo: Number(naoVal) || 0
+        })
+      });
+      if (res.ok) {
+        alert("✅ Comando Mestre: Votos atualizados e refletidos no site!");
+        window.location.reload();
+      } else {
+        alert("Erro ao salvar votos no servidor.");
+      }
+    } catch {
+      alert("Erro de conexão ao salvar votos.");
+    }
+  };
+  
+
   // --- SINCRONIZAÇÃO PERMANENTE DE ANÚNCIOS ---
   useEffect(() => {
     try {

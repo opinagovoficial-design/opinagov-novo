@@ -6,10 +6,12 @@ export const dynamic = "force-dynamic";
 
 const filePath = path.join(process.cwd(), "src", "lib", "duels-data.json");
 
-function readDuels() {
+function readDuels(): any[] {
   try {
     if (fs.existsSync(filePath)) {
-      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+      const raw = fs.readFileSync(filePath, "utf8");
+      const data = JSON.parse(raw);
+      if (Array.isArray(data)) return data;
     }
   } catch {}
   return [];
@@ -30,10 +32,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     let current = readDuels();
 
-    // Atualizar votos de um duelo específico
+    // 1. Atualização mestre de votos por ID ou correspondência de título
     if (body.action === "update_votes") {
+      let found = false;
       current = current.map((d: any) => {
-        if (d.id === body.duelId || d.title.toLowerCase().includes(String(body.duelId).toLowerCase())) {
+        if (d.id === body.duelId || (body.duelId && String(d.title).toLowerCase().includes(String(body.duelId).toLowerCase()))) {
+          found = true;
           return {
             ...d,
             votesYes: Number(body.votesYes) || 0,
@@ -42,13 +46,26 @@ export async function POST(req: Request) {
         }
         return d;
       });
+
+      // Se não encontrou por ID, cria ou sincroniza o registro
+      if (!found && body.duelId) {
+        current.push({
+          id: body.duelId,
+          category: "GERAL",
+          title: body.title || body.duelId,
+          votesYes: Number(body.votesYes) || 0,
+          votesNo: Number(body.votesNo) || 0,
+          active: true
+        });
+      }
+
       writeDuels(current);
       return NextResponse.json({ success: true, duels: current });
     }
 
-    // Criar novo duelo
+    // 2. Criação de nova pauta com votos configurados
     if (body.action === "create") {
-      const newDuel = {
+      const newEntry = {
         id: "duel-" + Date.now(),
         category: body.category || "GERAL",
         title: body.title,
@@ -56,12 +73,12 @@ export async function POST(req: Request) {
         votesNo: Number(body.votesNo) || 0,
         active: true
       };
-      current = [newDuel, ...current];
+      current = [newEntry, ...current];
       writeDuels(current);
-      return NextResponse.json({ success: true, duel: newDuel, duels: current });
+      return NextResponse.json({ success: true, duel: newEntry, duels: current });
     }
 
-    // Deletar duelo
+    // 3. Exclusão de duelo
     if (body.action === "delete") {
       current = current.filter((d: any) => d.id !== body.duelId);
       writeDuels(current);
