@@ -817,6 +817,35 @@ export default function Page() {
       <LiveVoteToast />
     </div>
   )
+
+      {/* SISTEMA DE CUPOM MESTRE - EXCLUSIVO DO ADMIN */}
+      <div className="fixed bottom-4 right-4 z-[9999]">
+        <button 
+          type="button"
+          onClick={() => {
+            const cupom = window.prompt("🎟️ Insira o Cupom Mestre:");
+            if (cupom === "Chefedoopina") {
+              const titulo = window.prompt("✅ Cupom aceite! Qual é a pergunta do novo duelo?");
+              if (!titulo) return;
+              const categoria = window.prompt("Categoria (ex: POLÍTICA, ECONOMIA, JUSTIÇA):") || "GERAL";
+              
+              fetch("/api/duels", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "create", title: titulo, category: categoria, votesYes: 0, votesNo: 0 })
+              }).then(() => {
+                alert("🚀 Duelo publicado imediatamente no site sem custos!");
+                window.location.reload();
+              });
+            } else if (cupom) {
+              alert("❌ Cupom inválido.");
+            }
+          }}
+          className="bg-slate-900/80 hover:bg-emerald-600 text-slate-400 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-full transition-all border border-slate-700 hover:border-emerald-400 shadow-xl backdrop-blur flex items-center gap-1 cursor-pointer"
+        >
+          🎟️ Cupom
+        </button>
+      </div>
 }
 
 
