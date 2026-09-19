@@ -25,6 +25,36 @@ import {
 
 export default function AdminPage() {
 
+  const handleSaveDirectVotes = async (pollId: any, simId: string, naoId: string) => {
+    try {
+      const simInput = document.getElementById(simId) as HTMLInputElement | null;
+      const naoInput = document.getElementById(naoId) as HTMLInputElement | null;
+      const simVal = Number(simInput?.value || 0);
+      const naoVal = Number(naoInput?.value || 0);
+
+      const res = await fetch("/api/duels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_votes",
+          duelId: String(pollId),
+          votesYes: simVal,
+          votesNo: naoVal
+        })
+      });
+
+      if (res.ok) {
+        alert("✅ Votos atualizados com sucesso!");
+        window.location.reload();
+      } else {
+        alert("Erro ao gravar votos na API.");
+      }
+    } catch {
+      alert("Erro de conexão ao salvar votos.");
+    }
+  };
+
+
   const handleMasterVoteUpdate = async (id: string, simVal: any, naoVal: any) => {
     try {
       const res = await fetch("/api/duels", {
