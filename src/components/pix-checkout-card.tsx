@@ -143,3 +143,4 @@ export function PixCheckoutCard({
 }
 
 // Forcar deploy Vercel: 1789795556451
+// VERCEL DEPLOY URGENTE: 1789796546946

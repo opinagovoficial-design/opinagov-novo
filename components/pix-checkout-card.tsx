@@ -142,3 +142,5 @@ export function PixCheckoutCard({
     </div>
   )
 }
+
+// VERCEL DEPLOY URGENTE: 1789796546940
