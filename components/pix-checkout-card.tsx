@@ -1,3 +1,4 @@
+// Force Deploy Vercel 1789795910122
 ﻿"use client"
 
 import { useState, useEffect } from "react"
@@ -18,7 +19,7 @@ export function PixCheckoutCard({
   qrCodeBase64,
   description,
   onConfirm,
-  confirmButtonText = "Já Efetuei o Pagamento Pix",
+  confirmButtonText = "Aguardando Banco Central...",
 }: PixCheckoutCardProps) {
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(900) // 15 minutos
