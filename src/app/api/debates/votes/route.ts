@@ -11,18 +11,14 @@ function getVotes() {
     if (fs.existsSync(filePath)) {
       return JSON.parse(fs.readFileSync(filePath, "utf8"));
     }
-  } catch (e) {
-    console.error("Erro ao ler votos de debate:", e);
-  }
+  } catch {}
   return {};
 }
 
 function saveVotes(data: any) {
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
-  } catch (e) {
-    console.error("Erro ao gravar votos de debate:", e);
-  }
+  } catch {}
 }
 
 export async function GET() {
@@ -32,21 +28,17 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { debateId, yesVotes, noVotes } = body;
-
-    if (!debateId) {
-      return NextResponse.json({ error: "ID do debate é obrigatório" }, { status: 400 });
-    }
+    const id = body.duelId || body.debateId;
+    if (!id) return NextResponse.json({ error: "ID ausente" }, { status: 400 });
 
     const current = getVotes();
-    current[debateId] = {
-      yes: Number(yesVotes) || 0,
-      no: Number(noVotes) || 0
+    current[id] = {
+      yes: Number(body.yesVotes) || 0,
+      no: Number(body.noVotes) || 0
     };
-
     saveVotes(current);
     return NextResponse.json({ success: true, votes: current });
-  } catch (e) {
-    return NextResponse.json({ error: "Erro ao salvar votos" }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Falha ao gravar" }, { status: 500 });
   }
 }

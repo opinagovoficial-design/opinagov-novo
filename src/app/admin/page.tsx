@@ -25,6 +25,24 @@ import {
 
 export default function AdminPage() {
 
+  const handleUpdateDuelVotes = async (duelId: string, yesCount: any, noCount: any) => {
+    try {
+      await fetch("/api/debates/votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ duelId, yesVotes: Number(yesCount) || 0, noVotes: Number(noCount) || 0 })
+      });
+      alert("Votos atualizados com sucesso!");
+      window.location.reload();
+    } catch {
+      alert("Falha ao salvar votos.");
+    }
+  };
+
+
+  
+  
+
   // --- CONTROLO MANUAL DE VOTOS DO DEBATE ---
   const [debateIdInput, setDebateIdInput] = useState("alexandre-moraes");
   const [debateYesVotes, setDebateYesVotes] = useState(1500);
@@ -413,7 +431,7 @@ export default function AdminPage() {
                       </span>
                       <p className="text-xs text-white font-medium">{d.title}</p>
                       <span className="text-[10px] text-slate-400">
-                        Sim: {d.yesVotes} | Não: {d.noVotes}
+                        
                       </span>
                     </div>
 
