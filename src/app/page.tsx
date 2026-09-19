@@ -49,26 +49,13 @@ function SafeBannerCarousel({ banners }: { banners: any[] }) {
   const carouselList = useMemo(() => {
     const valid = Array.isArray(banners) ? banners.filter((b) => b && b.imageUrl) : [];
     if (valid.length === 0) {
-      return [
-        {
-          id: "banner-hapvida",
-          title: "Hapvida NotreDame Intermédica",
-          imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
-          targetUrl: "https://www.hapvidandi.com.br"
-        },
-        {
-          id: "banner-institucional",
-          title: "Espaço Institucional OpinaGov • Anuncie Aqui",
-          imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
-          targetUrl: "https://wa.me/5511999999999?text=Quero%20anunciar%20no%20OpinaGov"
-        }
-      ];
+      return [{"id":"banner-hapvida","title":"Hapvida NotreDame Intermédica","imageUrl":"https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80","targetUrl":"https://www.hapvidandi.com.br","phone":"","createdAt":1789794102383,"expiresAt":1793250102383},{"id":"banner-opina-institucional","title":"Espaço Institucional OpinaGov • Anuncie Aqui","imageUrl":"https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80","targetUrl":"https://wa.me/5511999999999?text=Quero%20anunciar%20no%20OpinaGov","phone":"","createdAt":1789794102383,"expiresAt":1793250102383}];
     }
     if (valid.length === 1) {
       return [
         valid[0],
         {
-          id: "banner-institucional-auto",
+          id: "banner-institucional-rotativo",
           title: "Espaço Publicitário Disponível • Anuncie Conosco",
           imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
           targetUrl: "https://wa.me/5511999999999?text=Quero%20anunciar%20no%20OpinaGov"

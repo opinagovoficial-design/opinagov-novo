@@ -5,7 +5,7 @@ import path from "path";
 export const dynamic = "force-dynamic";
 const filePath = path.join(process.cwd(), "src", "lib", "duels-data.json");
 
-function readDuels() {
+function getDuels() {
   try {
     if (fs.existsSync(filePath)) {
       return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -14,39 +14,23 @@ function readDuels() {
   return [];
 }
 
-function writeDuels(data: any[]) {
+function saveDuels(data: any[]) {
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
   } catch {}
 }
 
 export async function GET() {
-  return NextResponse.json(readDuels());
+  return NextResponse.json(getDuels());
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let duels = readDuels();
+    let list = getDuels();
 
-    // Criar nova pergunta / duelo
-    if (body.action === "create" || (!body.action && body.title)) {
-      const newDuelo = {
-        id: "duel-" + Date.now(),
-        category: body.category || "GERAL",
-        title: body.title,
-        votesYes: Number(body.votesYes) || 0,
-        votesNo: Number(body.votesNo) || 0,
-        active: true
-      };
-      duels = [newDuelo, ...duels];
-      writeDuels(duels);
-      return NextResponse.json({ success: true, duel: newDuelo, duels });
-    }
-
-    // Atualizar votos
     if (body.action === "update_votes") {
-      duels = duels.map((d: any) => {
+      list = list.map((d: any) => {
         if (d.id === body.duelId || String(d.title).toLowerCase().includes(String(body.duelId).toLowerCase())) {
           return {
             ...d,
@@ -56,19 +40,32 @@ export async function POST(req: Request) {
         }
         return d;
       });
-      writeDuels(duels);
-      return NextResponse.json({ success: true, duels });
+      saveDuels(list);
+      return NextResponse.json({ success: true, duels: list });
     }
 
-    // Excluir duelo
+    if (body.action === "create" || (!body.action && body.title)) {
+      const newEntry = {
+        id: "duel-" + Date.now(),
+        category: body.category || "GERAL",
+        title: body.title,
+        votesYes: Number(body.votesYes) || 0,
+        votesNo: Number(body.votesNo) || 0,
+        active: true
+      };
+      list = [newEntry, ...list];
+      saveDuels(list);
+      return NextResponse.json({ success: true, duel: newEntry, duels: list });
+    }
+
     if (body.action === "delete") {
-      duels = duels.filter((d: any) => d.id !== body.duelId);
-      writeDuels(duels);
-      return NextResponse.json({ success: true, duels });
+      list = list.filter((d: any) => d.id !== body.duelId);
+      saveDuels(list);
+      return NextResponse.json({ success: true, duels: list });
     }
 
-    return NextResponse.json({ success: true, duels });
+    return NextResponse.json({ success: true, duels: list });
   } catch {
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    return NextResponse.json({ error: "Erro na API" }, { status: 500 });
   }
 }
