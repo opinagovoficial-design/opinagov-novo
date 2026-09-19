@@ -25,6 +25,32 @@ import {
 
 export default function AdminPage() {
 
+  // --- SINCRONIZAÇÃO PERMANENTE DE ANÚNCIOS ---
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("opinagov_master_banners");
+      const localList = stored ? JSON.parse(stored) : [];
+
+      fetch("/api/banners")
+        .then((r) => r.json())
+        .then((serverList) => {
+          if (Array.isArray(serverList)) {
+            if (serverList.length === 0 && localList.length > 0) {
+              // Servidor reiniciou ou perdeu dados: repõe automaticamente do navegador
+              fetch("/api/banners", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "sync_all", banners: localList })
+              });
+            } else if (serverList.length > 0) {
+              localStorage.setItem("opinagov_master_banners", JSON.stringify(serverList));
+            }
+          }
+        });
+    } catch {}
+  }, []);
+
+
   const handleUpdateDuelVotes = async (duelId: string, yesCount: any, noCount: any) => {
     try {
       await fetch("/api/debates/votes", {
