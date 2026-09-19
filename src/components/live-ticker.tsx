@@ -4,7 +4,7 @@ import { Activity } from "lucide-react"
 
 const items = [
   "Último apoio registrado há 8s",
-  "42.180 participações auditadas",
+  "⚡ Empate Técnico: Diferença de 1,4% • Defenda seu candidato",
   "Cobertura 100% nacional",
   "Liquidação Pix média em 2s",
   "1.250 cidadãos online agora",
