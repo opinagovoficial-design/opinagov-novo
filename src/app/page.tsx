@@ -44,6 +44,9 @@ interface ActiveBanner {
 export default function Page() {
 
   
+
+
+  
   
 
   const [banners, setBanners] = useState<Array<{ id?: string; imageUrl: string; targetUrl: string; title: string; expiresAt: number }>>([])
@@ -75,33 +78,36 @@ export default function Page() {
       setBannerIdx((prev: number) => (prev + 1) % banners.length)
     }, 5000)
   
-  // --- Ticker Dinâmico de Liderança em Tempo Real ---
+  
+
+
+  // Ticker Dinâmico de Liderança
   const [tickerIndex, setTickerIndex] = useState(0);
 
   const sortedCands = useMemo(() => {
-    return Array.isArray(candidates) ? [...candidates].sort((a: any, b: any) => b.votes - a.votes) : [];
+    return Array.isArray(candidates) ? [...candidates].sort((a: any, b: any) => (b.votes || 0) - (a.votes || 0)) : [];
   }, [candidates]);
 
   const leader1 = sortedCands[0];
   const leader2 = sortedCands[1];
-  const totalTopVotes = (leader1?.votes || 0) + (leader2?.votes || 0);
-  const diffPercent = totalTopVotes > 0 
-    ? (Math.abs((leader1.votes - leader2.votes) / totalTopVotes) * 100).toFixed(1)
+  const totalTop = (leader1?.votes || 0) + (leader2?.votes || 0);
+  const diffMargin = totalTop > 0 
+    ? (Math.abs((leader1.votes - leader2.votes) / totalTop) * 100).toFixed(1)
     : "1.2";
 
   const tickerMessages = [
     leader1 && leader2 
       ? "🟢 Apuração em tempo real • " + (leader1.ballotName || leader1.name) + " e " + (leader2.ballotName || leader2.name) + " em disputa acirrada"
       : "🟢 Apuração em tempo real • Disputa acirrada na liderança",
-    "⚡ Margem estreita: " + diffPercent + "% de diferença entre os líderes • Defenda seu candidato",
+    "⚡ Margem estreita: " + diffMargin + "% de diferença entre os líderes • Defenda seu candidato",
     "🔥 Tendência de virada: oscilação constante na apuração • Participe agora"
   ];
 
   useEffect(() => {
-    const tickerTimer = setInterval(() => {
+    const tTimer = setInterval(() => {
       setTickerIndex((prev) => (prev + 1) % 3);
     }, 4500);
-    return () => clearInterval(tickerTimer);
+    return () => clearInterval(tTimer);
   }, []);
 
   return () => clearInterval(timer)
@@ -144,10 +150,7 @@ export default function Page() {
   const [adTargetUrl, setAdTargetUrl] = useState("")
   const [adImagePreview, setAdImagePreview] = useState("")
   const [loadingPix, setLoadingPix] = useState(false)
-  const [pixData, setPixData] = useState<{ qrCode: string;
-
-  
- qrCodeBase64?: string } | null>(null)
+  const [pixData, setPixData] = useState<{ qrCode?: any; qrCodeBase64?: any; copyPaste?: any; txid?: any } | null>(null);
   const [pixCopied, setPixCopied] = useState(false)
 
   useEffect(() => {
