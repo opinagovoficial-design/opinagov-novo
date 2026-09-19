@@ -43,36 +43,8 @@ interface ActiveBanner {
 
 export default function Page() {
 
-  const [bannerList, setBannerList] = useState<any[]>([])
-  const [currentIdx, setCurrentIdx] = useState(0)
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("opinagov_banners_list")
-      if (stored) {
-        const parsed = JSON.parse(stored).filter((b: any) => b.expiresAt > Date.now())
-        if (parsed.length > 0) setBannerList(parsed)
-      } else {
-        const single = localStorage.getItem("opinagov_active_banner")
-        if (single) {
-          const parsedSingle = JSON.parse(single)
-          if (parsedSingle.expiresAt > Date.now()) setBannerList([parsedSingle])
-        }
-      }
-    } catch {}
-  }, [])
-
-  useEffect(() => {
-    if (bannerList.length <= 1) return
-    const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % bannerList.length)
-    }, 6000)
-    return () => clearInterval(timer)
-  }, [bannerList.length])
-
-
-  const [banners, setBanners] = useState<any[]>([])
-  const [bannerIdx, setBannerIdx] = useState(0)
+  const [banners, setBanners] = useState<Array<{ id?: string; imageUrl: string; targetUrl: string; title: string; expiresAt: number }>>([])
+  const [bannerIdx, setBannerIdx] = useState<number>(0)
 
   useEffect(() => {
     try {
@@ -96,11 +68,17 @@ export default function Page() {
 
   useEffect(() => {
     if (banners.length <= 1) return
-    const interval = setInterval(() => {
-      setBannerIdx((prev) => (prev + 1) % banners.length)
-    }, 6000)
-    return () => clearInterval(interval)
+    const timer = setInterval(() => {
+      setBannerIdx((prev: number) => (prev + 1) % banners.length)
+    }, 5000)
+    return () => clearInterval(timer)
   }, [banners.length])
+
+
+  const [bannerList, setBannerList] = useState<any[]>([])
+  const [currentIdx, setCurrentIdx] = useState(0)
+
+  
 
   useEffect(() => {
     try {
