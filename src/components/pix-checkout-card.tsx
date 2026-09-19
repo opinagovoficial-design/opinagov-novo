@@ -18,7 +18,7 @@ export function PixCheckoutCard({
   qrCodeBase64,
   description,
   onConfirm,
-  confirmButtonText = "Já Efetuei o Pagamento Pix",
+  confirmButtonText = "Aguardando confirmação bancária...",
 }: PixCheckoutCardProps) {
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(900) // 15 minutos
@@ -140,3 +140,5 @@ export function PixCheckoutCard({
     </div>
   )
 }
+
+// Forcar deploy Vercel: 1789795556451
