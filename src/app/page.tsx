@@ -1,4 +1,4 @@
-﻿"use client"
+"use client";
 
 import { LgpdFooterModal } from "../components/lgpd-modal"
 import { useState, useEffect, useMemo } from "react"
@@ -81,34 +81,7 @@ export default function Page() {
   
 
 
-  // Ticker Dinâmico de Liderança
-  const [tickerIndex, setTickerIndex] = useState(0);
-
-  const sortedCands = useMemo(() => {
-    return Array.isArray(candidates) ? [...candidates].sort((a: any, b: any) => (b.votes || 0) - (a.votes || 0)) : [];
-  }, [candidates]);
-
-  const leader1 = sortedCands[0];
-  const leader2 = sortedCands[1];
-  const totalTop = (leader1?.votes || 0) + (leader2?.votes || 0);
-  const diffMargin = totalTop > 0 
-    ? (Math.abs((leader1.votes - leader2.votes) / totalTop) * 100).toFixed(1)
-    : "1.2";
-
-  const tickerMessages = [
-    leader1 && leader2 
-      ? "🟢 Apuração em tempo real • " + (leader1.ballotName || leader1.name) + " e " + (leader2.ballotName || leader2.name) + " em disputa acirrada"
-      : "🟢 Apuração em tempo real • Disputa acirrada na liderança",
-    "⚡ Margem estreita: " + diffMargin + "% de diferença entre os líderes • Defenda seu candidato",
-    "🔥 Tendência de virada: oscilação constante na apuração • Participe agora"
-  ];
-
-  useEffect(() => {
-    const tTimer = setInterval(() => {
-      setTickerIndex((prev) => (prev + 1) % 3);
-    }, 4500);
-    return () => clearInterval(tTimer);
-  }, []);
+  
 
   return () => clearInterval(timer)
   }, [banners.length])
