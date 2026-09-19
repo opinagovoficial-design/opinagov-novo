@@ -144,6 +144,20 @@ function SafeBannerCarousel({ banners }: { banners: any[] }) {
 
 export default function Page() {
 
+  const [activeDuels, setActiveDuels] = useState<any[]>([{"id":"duel-moraes","category":"JUSTIÇA / POLÍTICA","title":"Alexandre de Moraes deve ser investigado? (STF)","votesYes":1450,"votesNo":320,"active":true},{"id":"duel-economia","category":"ECONOMIA","title":"Prioridades Econômicas e Controle de Inflação","votesYes":1323,"votesNo":618,"active":true},{"id":"duel-seguranca","category":"SEGURANÇA","title":"Estratégias de Segurança Pública Integrada e Prisões Federais","votesYes":940,"votesNo":260,"active":true},{"id":"duel-ambiente","category":"MEIO AMBIENTE","title":"Metas de Transição Energética e Sustentabilidade","votesYes":690,"votesNo":240,"active":true}]);
+
+  useEffect(() => {
+    fetch("/api/duels")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setActiveDuels(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+
   const [liveDuels, setLiveDuels] = useState<any[]>([]);
 
   useEffect(() => {
