@@ -42,6 +42,38 @@ interface ActiveBanner {
 }
 
 export default function Page() {
+
+  const [banners, setBanners] = useState<any[]>([])
+  const [bannerIdx, setBannerIdx] = useState(0)
+
+  useEffect(() => {
+    try {
+      const storedList = localStorage.getItem("opinagov_banners_list")
+      if (storedList) {
+        const parsed = JSON.parse(storedList).filter((b: any) => b.expiresAt > Date.now())
+        if (parsed.length > 0) {
+          setBanners(parsed)
+          return
+        }
+      }
+      const single = localStorage.getItem("opinagov_active_banner")
+      if (single) {
+        const parsedSingle = JSON.parse(single)
+        if (parsedSingle.expiresAt > Date.now()) {
+          setBanners([parsedSingle])
+        }
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (banners.length <= 1) return
+    const interval = setInterval(() => {
+      setBannerIdx((prev) => (prev + 1) % banners.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [banners.length])
+
   useEffect(() => {
     try {
       const storedCand = localStorage.getItem("opinagov_candidates")

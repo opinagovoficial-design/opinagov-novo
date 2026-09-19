@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [bannerTitle, setBannerTitle] = useState("")
   const [bannerUrl, setBannerUrl] = useState("")
   const [bannerImg, setBannerImg] = useState("")
+  const [bannersList, setBannersList] = useState<any[]>([])
 
   useEffect(() => {
     const isAuth = sessionStorage.getItem("opinagov_admin_auth")
@@ -62,6 +63,8 @@ export default function AdminPage() {
       const storedCandidates = localStorage.getItem("opinagov_candidates")
       setCandidates(storedCandidates ? JSON.parse(storedCandidates) : initialCandidates)
 
+      const storedBannersList = localStorage.getItem("opinagov_banners_list")
+      if (storedBannersList) setBannersList(JSON.parse(storedBannersList))
       const storedComments = localStorage.getItem("opinagov_comments")
       setComments(storedComments ? JSON.parse(storedComments) : initialComments)
     } catch {
@@ -163,28 +166,56 @@ export default function AdminPage() {
   const handleSaveBanner = (e: React.FormEvent) => {
     e.preventDefault()
     if (!bannerImg.trim()) {
-      alert("Por favor, selecione um ficheiro de imagem.")
+      alert("Por favor, selecione um arquivo de imagem.")
       return
     }
 
-    const bannerObj = {
+    const newBanner = {
+      id: "b-" + Date.now(),
       imageUrl: bannerImg,
       targetUrl: bannerUrl.trim() || "https://opinagov.com.br",
       title: bannerTitle.trim() || "Espaço Patrocinado",
       expiresAt: Date.now() + 40 * 24 * 60 * 60 * 1000,
     }
 
-    localStorage.setItem("opinagov_active_banner", JSON.stringify(bannerObj))
-    alert("Banner ativado com sucesso por 40 dias!")
-  }
+    let existing: any[] = []
+    try {
+      const stored = localStorage.getItem("opinagov_banners_list")
+      if (stored) existing = JSON.parse(stored)
+    } catch {}
 
-  const handleRemoveBanner = () => {
-    if (!confirm("Deseja desativar o banner atual?")) return
-    localStorage.removeItem("opinagov_active_banner")
+    const updated = [newBanner, ...existing]
+    localStorage.setItem("opinagov_banners_list", JSON.stringify(updated))
+    localStorage.setItem("opinagov_active_banner", JSON.stringify(newBanner))
+    setBannersList(updated)
+    
     setBannerImg("")
     setBannerTitle("")
     setBannerUrl("")
-    alert("Banner removido!")
+    alert("Banner adicionado ao carrossel com sucesso! Atualmente há " + updated.length + " anúncio(s) em rotação.")
+  }
+
+  const handleDeleteSingleBanner = (id: string) => {
+    if (!confirm("Deseja remover este banner do carrossel?")) return
+    const updated = bannersList.filter((b) => b.id !== id)
+    setBannersList(updated)
+    localStorage.setItem("opinagov_banners_list", JSON.stringify(updated))
+    if (updated.length > 0) {
+      localStorage.setItem("opinagov_active_banner", JSON.stringify(updated[0]))
+    } else {
+      localStorage.removeItem("opinagov_active_banner")
+    }
+  }
+
+  const handleRemoveBanner = () => {
+    if (!confirm("Deseja desativar todos os banners?")) return
+    localStorage.removeItem("opinagov_banners_list")
+    localStorage.removeItem("opinagov_active_banner")
+    setBannersList([])
+    setBannerImg("")
+    setBannerTitle("")
+    setBannerUrl("")
+    alert("Todos os banners foram desativados!")
   }
 
   const handleDeleteComment = (id: string) => {
