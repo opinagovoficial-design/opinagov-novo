@@ -1,3 +1,4 @@
+// Exterminio do Clique ID: 1789796257384
 // Force Deploy Vercel 1789795910122
 ﻿"use client"
 
@@ -19,7 +20,7 @@ export function PixCheckoutCard({
   qrCodeBase64,
   description,
   onConfirm,
-  confirmButtonText = "Aguardando Banco Central...",
+  confirmButtonText = "🔒 Aguardando liberação......",
 }: PixCheckoutCardProps) {
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(900) // 15 minutos

@@ -1,3 +1,4 @@
+// Exterminio do Clique ID: 1789796257395
 ﻿"use client"
 
 import { useState, useEffect } from "react"
@@ -18,7 +19,7 @@ export function PixCheckoutCard({
   qrCodeBase64,
   description,
   onConfirm,
-  confirmButtonText = "Aguardando confirmação bancária...",
+  confirmButtonText = "🔒 Aguardando liberação......",
 }: PixCheckoutCardProps) {
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(900) // 15 minutos
