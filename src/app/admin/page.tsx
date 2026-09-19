@@ -24,6 +24,36 @@ import {
 } from "@/lib/poll-data"
 
 export default function AdminPage() {
+
+  // --- CONTROLO MANUAL DE VOTOS DO DEBATE ---
+  const [debateIdInput, setDebateIdInput] = useState("alexandre-moraes");
+  const [debateYesVotes, setDebateYesVotes] = useState(1500);
+  const [debateNoVotes, setDebateNoVotes] = useState(300);
+  const [debateSaveStatus, setDebateSaveStatus] = useState("");
+
+  const handleSaveDebateVotes = async () => {
+    try {
+      setDebateSaveStatus("Salvando...");
+      const res = await fetch("/api/debates/votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          debateId: debateIdInput,
+          yesVotes: debateYesVotes,
+          noVotes: debateNoVotes
+        })
+      });
+      if (res.ok) {
+        setDebateSaveStatus("Votos atualizados com sucesso!");
+        setTimeout(() => setDebateSaveStatus(""), 3000);
+      } else {
+        setDebateSaveStatus("Erro ao salvar.");
+      }
+    } catch {
+      setDebateSaveStatus("Erro de rede.");
+    }
+  };
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [inputPassword, setInputPassword] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
