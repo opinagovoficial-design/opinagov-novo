@@ -7,7 +7,7 @@ const items = [
   "⚡ Empate Técnico: Diferença de 1,4% • Defenda seu candidato",
   "Cobertura 100% nacional",
   "Liquidação Pix média em 2s",
-  "1.250 cidadãos online agora",
+  "Monitoramento ao vivo • Disputa acirrada",
   "Rede cívica sincronizada em tempo real",
 ]
 

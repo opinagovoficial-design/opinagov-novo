@@ -27,7 +27,7 @@ export function SiteHeader({ onCreate }: { onCreate: () => void }) {
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            1.250 cidadãos online agora
+            Monitoramento ao vivo • Disputa acirrada
           </span>
           <Button
             onClick={onCreate}
