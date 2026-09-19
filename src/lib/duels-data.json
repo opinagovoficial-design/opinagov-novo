@@ -1,14 +1,14 @@
 [
   {
     "id": "duel-moraes",
-    "category": "JUSTIÇA / POLÍTICA",
+    "category": "ECONOMIA",
     "title": "Alexandre de Moraes deve ser investigado? (STF)",
     "votesYes": 1450,
     "votesNo": 320,
     "active": true
   },
   {
-    "id": "duel-economia",
+    "id": "duel-1",
     "category": "ECONOMIA",
     "title": "Prioridades Econômicas e Controle de Inflação",
     "votesYes": 1323,
@@ -16,7 +16,7 @@
     "active": true
   },
   {
-    "id": "duel-seguranca",
+    "id": "duel-2",
     "category": "SEGURANÇA",
     "title": "Estratégias de Segurança Pública Integrada e Prisões Federais",
     "votesYes": 940,
@@ -24,7 +24,7 @@
     "active": true
   },
   {
-    "id": "duel-ambiente",
+    "id": "duel-3",
     "category": "MEIO AMBIENTE",
     "title": "Metas de Transição Energética e Sustentabilidade",
     "votesYes": 690,
