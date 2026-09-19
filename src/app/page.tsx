@@ -420,8 +420,8 @@ export default function Page() {
   }
 
   const handleShareNewDebate = (debate: Debate) => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://opinagov.vercel.app"
-    const text = `🔥 *Criei uma Nova Consulta no OpinaGov!*\n\n"${debate.title}"\n\nParticipe e dê seu voto auditado agora:\n👉 ${origin}#debates`
+    const origin = typeof window !== "undefined" ? "https://opinagov.org" : "https://opinagov.vercel.app"
+    const text = `🔥 *Criei uma Nova Consulta no OpinaGov!*\n\n"${debate.title}"\n\nParticipe e dê seu voto auditado agora:\n👉 https://opinagov.org#debates#debates`
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank")
   }
 
