@@ -1,80 +1,64 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { defaultBanners, BannerItem } from "@/lib/banners-storage-seed";
 
 export const dynamic = "force-dynamic";
 
 const dataFilePath = path.join(process.cwd(), "src", "lib", "banners-data.json");
-const uploadsDir = path.join(process.cwd(), "public", "uploads");
 
-function readBanners() {
+function getBanners(): BannerItem[] {
+  let list: BannerItem[] = [];
   try {
     if (fs.existsSync(dataFilePath)) {
       const raw = fs.readFileSync(dataFilePath, "utf8");
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        list = parsed;
+      }
     }
-  } catch (err) {
-    console.error("Erro ao ler banners:", err);
+  } catch {}
+
+  // Se o deploy da Vercel limpou o arquivo temporário, usa o seed estável
+  if (list.length === 0) {
+    list = [...defaultBanners];
   }
-  return [];
+
+  const now = Date.now();
+  return list.filter((b) => !b.expiresAt || Number(b.expiresAt) > now);
 }
 
-function writeBanners(items: any[]) {
+function saveBanners(items: BannerItem[]) {
   try {
     fs.writeFileSync(dataFilePath, JSON.stringify(items, null, 2), "utf8");
-  } catch (err) {
-    console.error("Erro ao escrever banners:", err);
-  }
+  } catch {}
 }
 
 export async function GET() {
-  try {
-    const banners = readBanners();
-    const now = Date.now();
-    // Mantém ativos os que não venceram (40 dias)
-    const valid = banners.filter((b: any) => !b.expiresAt || Number(b.expiresAt) > now);
-    return NextResponse.json(valid);
-  } catch {
-    return NextResponse.json([]);
-  }
+  return NextResponse.json(getBanners());
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let current = readBanners();
+    let current = getBanners();
 
     if (body.action === "delete") {
-      current = current.filter((b: any) => b.id !== body.id);
-      writeBanners(current);
+      current = current.filter((b) => b.id !== body.id);
+      saveBanners(current);
       return NextResponse.json({ success: true, banners: current });
     }
 
-    let finalImageUrl = body.imageUrl;
-
-    // Se veio imagem em Base64 pesado, salva no disco local em /public/uploads
-    if (body.imageUrl && body.imageUrl.startsWith("data:image")) {
-      const matches = body.imageUrl.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-      if (matches && matches.length === 3) {
-        const ext = matches[1].includes("png") ? "png" : matches[1].includes("webp") ? "webp" : "jpg";
-        const buffer = Buffer.from(matches[2], "base64");
-        const filename = "banner-" + Date.now() + "." + ext;
-        
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        
-        const filePath = path.join(uploadsDir, filename);
-        fs.writeFileSync(filePath, buffer);
-        finalImageUrl = "/uploads/" + filename;
-      }
+    if (body.action === "sync_all" && Array.isArray(body.banners)) {
+      saveBanners(body.banners);
+      return NextResponse.json({ success: true, banners: body.banners });
     }
 
     const now = Date.now();
-    const newBanner = {
+    const newBanner: BannerItem = {
       id: "ban-" + now,
-      title: body.title || "Anúncio Patrocinado",
-      imageUrl: finalImageUrl,
+      title: body.title || "Patrocinador Oficial",
+      imageUrl: body.imageUrl,
       targetUrl: body.targetUrl || "https://opinagov.com.br",
       phone: body.phone || "",
       createdAt: now,
@@ -82,11 +66,10 @@ export async function POST(req: Request) {
     };
 
     const updated = [newBanner, ...current];
-    writeBanners(updated);
+    saveBanners(updated);
 
     return NextResponse.json({ success: true, banner: newBanner, banners: updated });
-  } catch (error) {
-    console.error("Erro no upload de banner:", error);
-    return NextResponse.json({ error: "Erro ao processar anúncio" }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Erro ao processar banner" }, { status: 500 });
   }
 }

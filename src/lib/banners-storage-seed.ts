@@ -8,14 +8,15 @@ export interface BannerItem {
   expiresAt: number;
 }
 
+// Banners fixados diretamente na base do código (imunes a deploys da Vercel)
 export const defaultBanners: BannerItem[] = [
   {
-    id: "seed-banner-1",
-    title: "Espaço Institucional e Patrocínio",
-    imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
-    targetUrl: "https://wa.me/5511999999999?text=Quero%20anunciar%20no%20OpinaGov",
+    id: "banner-hapvida",
+    title: "Hapvida NotreDame Intermédica",
+    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+    targetUrl: "https://www.hapvidandi.com.br",
     phone: "",
-    createdAt: 1789790777414,
-    expiresAt: 1793246777414,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 40 * 24 * 60 * 60 * 1000,
   }
 ];

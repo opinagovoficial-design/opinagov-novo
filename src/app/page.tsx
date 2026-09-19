@@ -43,6 +43,21 @@ interface ActiveBanner {
 
 export default function Page() {
 
+  useEffect(() => {
+    fetch("/api/banners")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setBanners(data);
+          try {
+            localStorage.setItem("opinagov_cached_banners", JSON.stringify(data));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+
   
 
 
