@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import { LgpdFooterModal } from "../components/lgpd-modal"
-import { useState, useEffect, useMemo } from "react"
+
 import { SplashReveal } from "../components/splash-reveal"
 import { LiveTicker } from "../components/live-ticker"
 import { CommunityTicker } from "../components/community-ticker"
@@ -40,6 +41,106 @@ interface ActiveBanner {
   title: string
   expiresAt: number
 }
+
+
+function SafeBannerCarousel({ banners }: { banners: any[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const carouselList = useMemo(() => {
+    const valid = Array.isArray(banners) ? banners.filter((b) => b && b.imageUrl) : [];
+    if (valid.length === 0) {
+      return [
+        {
+          id: "banner-hapvida",
+          title: "Hapvida NotreDame Intermédica",
+          imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80",
+          targetUrl: "https://www.hapvidandi.com.br"
+        },
+        {
+          id: "banner-institucional",
+          title: "Espaço Institucional OpinaGov • Anuncie Aqui",
+          imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
+          targetUrl: "https://wa.me/5511999999999?text=Quero%20anunciar%20no%20OpinaGov"
+        }
+      ];
+    }
+    if (valid.length === 1) {
+      return [
+        valid[0],
+        {
+          id: "banner-institucional-auto",
+          title: "Espaço Publicitário Disponível • Anuncie Conosco",
+          imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
+          targetUrl: "https://wa.me/5511999999999?text=Quero%20anunciar%20no%20OpinaGov"
+        }
+      ];
+    }
+    return valid;
+  }, [banners]);
+
+  useEffect(() => {
+    if (carouselList.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % carouselList.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [carouselList.length]);
+
+  const active = carouselList[currentIndex % carouselList.length] || carouselList[0];
+
+  return (
+    <div className="w-full max-w-5xl mx-auto my-6 px-4">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
+        <a 
+          href={active.targetUrl || "#"} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="block w-full h-[180px] md:h-[220px] relative transition-opacity duration-700"
+          key={active.id + "-" + currentIndex}
+        >
+          <img 
+            src={active.imageUrl} 
+            alt={active.title || "Anúncio"} 
+            className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.01]"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80";
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex items-end p-4">
+            <div className="flex justify-between items-center w-full">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] bg-amber-500 text-black font-extrabold px-2.5 py-0.5 rounded uppercase tracking-wider">
+                  Patrocinador Oficial
+                </span>
+                <span className="text-xs text-white font-medium drop-shadow-md">
+                  {active.title}
+                </span>
+              </div>
+              <span className="text-xs text-amber-300 bg-black/70 backdrop-blur px-3 py-1 rounded-full border border-amber-500/30 font-semibold">
+                40 dias restantes ↗
+              </span>
+            </div>
+          </div>
+        </a>
+
+        {carouselList.length > 1 && (
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10 bg-black/60 px-3 py-1 rounded-full backdrop-blur-md">
+            {carouselList.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setCurrentIndex(i)}
+                className={"h-1.5 rounded-full transition-all duration-300 " + (i === (currentIndex % carouselList.length) ? "w-6 bg-amber-400" : "w-2 bg-white/40 hover:bg-white/70")}
+                aria-label={"Ir para o slide " + (i + 1)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 export default function Page() {
 
