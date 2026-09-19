@@ -8,7 +8,6 @@ import {
   LogOut,
   PlusCircle,
   Trash2,
-  CheckCircle,
   Megaphone,
   UserPlus,
   MessageSquare,
@@ -29,24 +28,20 @@ export default function AdminPage() {
   const [inputPassword, setInputPassword] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
 
-  // Estados de Gerenciamento
   const [activeTab, setActiveTab] = useState<"debates" | "candidates" | "banners" | "comments">("debates")
   const [debates, setDebates] = useState<Debate[]>([])
   const [candidates, setCandidates] = useState<Candidate[]>([])
   const [comments, setComments] = useState<Comment[]>([])
 
-  // Formulário de Novo Duelo Gratuito
   const [debateTitle, setDebateTitle] = useState("")
   const [debateCategory, setDebateCategory] = useState("Economia")
 
-  // Formulário de Novo Candidato
   const [candName, setCandName] = useState("")
   const [candRole, setCandRole] = useState("Presidência da República")
   const [candParty, setCandParty] = useState("")
   const [candNumber, setCandNumber] = useState("")
-  const [candColor, setCandColor] = useState("#009b3a")
+  const [candColor] = useState("#009b3a")
 
-  // Formulário de Banner Manual
   const [bannerTitle, setBannerTitle] = useState("")
   const [bannerUrl, setBannerUrl] = useState("")
   const [bannerImg, setBannerImg] = useState("")
@@ -94,7 +89,6 @@ export default function AdminPage() {
     setInputPassword("")
   }
 
-  // --- Ações de Debates ---
   const handleCreateDebateAdmin = (e: React.FormEvent) => {
     e.preventDefault()
     if (!debateTitle.trim()) return
@@ -123,7 +117,6 @@ export default function AdminPage() {
     localStorage.setItem("opinagov_debates", JSON.stringify(updated))
   }
 
-  // --- Ações de Candidatos ---
   const handleCreateCandidate = (e: React.FormEvent) => {
     e.preventDefault()
     if (!candName.trim()) return
@@ -131,14 +124,14 @@ export default function AdminPage() {
     const newCand: Candidate = {
       id: `c-${Date.now()}`,
       name: candName.trim(),
+      ballotName: candName.trim(),
       role: candRole,
       party: candParty.trim() || "INDEPENDENTE",
-      ballotName: candName.trim(),
-      demands: [],
       ballotNumber: candNumber.trim() || "00",
       votes: 1,
-            color: candColor,
-                }
+      color: candColor,
+      demands: [],
+    }
 
     const updated = [newCand, ...candidates]
     setCandidates(updated)
@@ -146,39 +139,54 @@ export default function AdminPage() {
     setCandName("")
     setCandParty("")
     setCandNumber("")
-    alert("Candidato/Cargo adicionado com sucesso!")
+    alert("Candidato adicionado com sucesso!")
   }
 
   const handleDeleteCandidate = (id: string) => {
-    if (!confirm("Deseja realmente remover este candidato do painel?")) return
+    if (!confirm("Deseja realmente remover este candidato?")) return
     const updated = candidates.filter((c) => c.id !== id)
     setCandidates(updated)
     localStorage.setItem("opinagov_candidates", JSON.stringify(updated))
   }
 
-  // --- Ações de Banners ---
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setBannerImg(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSaveBanner = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!bannerImg.trim()) return
+    if (!bannerImg.trim()) {
+      alert("Por favor, selecione um ficheiro de imagem.")
+      return
+    }
 
     const bannerObj = {
-      imageUrl: bannerImg.trim(),
+      imageUrl: bannerImg,
       targetUrl: bannerUrl.trim() || "https://opinagov.com.br",
       title: bannerTitle.trim() || "Espaço Patrocinado",
       expiresAt: Date.now() + 40 * 24 * 60 * 60 * 1000,
     }
 
     localStorage.setItem("opinagov_active_banner", JSON.stringify(bannerObj))
-    alert("Banner ativado manualmente no topo do site por 40 dias!")
+    alert("Banner ativado com sucesso por 40 dias!")
   }
 
   const handleRemoveBanner = () => {
-    if (!confirm("Deseja desativar o banner atual do topo do site?")) return
+    if (!confirm("Deseja desativar o banner atual?")) return
     localStorage.removeItem("opinagov_active_banner")
+    setBannerImg("")
+    setBannerTitle("")
+    setBannerUrl("")
     alert("Banner removido!")
   }
 
-  // --- Ações de Mural ---
   const handleDeleteComment = (id: string) => {
     const updated = comments.filter((c) => c.id !== id)
     setComments(updated)
@@ -192,18 +200,18 @@ export default function AdminPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 mx-auto mb-4">
             <Lock className="h-6 w-6" />
           </div>
-          <h1 className="text-lg font-bold text-center text-white mb-1">Painel Master de Controle</h1>
-          <p className="text-xs text-slate-400 text-center mb-6">OpinaGov — Administração Central</p>
+          <h1 className="text-lg font-bold text-center text-white mb-1">Painel Master de Gestão</h1>
+          <p className="text-xs text-slate-400 text-center mb-6">OpinaGov — Controlo Restrito</p>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-3">
             <div>
-              <label className="block text-xs text-slate-300 font-medium mb-1">Senha de Administrador</label>
+              <label className="block text-xs text-slate-300 font-medium mb-1">Palavra-passe de Acesso</label>
               <input
                 type="password"
                 required
                 value={inputPassword}
                 onChange={(e) => setInputPassword(e.target.value)}
-                placeholder="Digite a senha mestra..."
+                placeholder="Introduza a palavra-passe..."
                 className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-cyan-500"
               />
             </div>
@@ -214,13 +222,13 @@ export default function AdminPage() {
               type="submit"
               className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg mt-1"
             >
-              Acessar Painel
+              Entrar no Painel
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <Link href="/" className="text-xs text-slate-500 hover:text-slate-300 transition">
-              ← Retornar ao Site Público
+              ← Voltar à Página Principal
             </Link>
           </div>
         </div>
@@ -231,7 +239,6 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pb-20">
       <div className="max-w-5xl mx-auto">
-        {/* Topo do Painel */}
         <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
           <div className="flex items-center gap-3">
             <Link
@@ -244,7 +251,7 @@ export default function AdminPage() {
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 Painel Master de Gestão <ShieldAlert className="h-5 w-5 text-cyan-400" />
               </h1>
-              <p className="text-xs text-slate-400">Controle total sobre duelos, votações, enquetes e banners</p>
+              <p className="text-xs text-slate-400">Administração de debates, candidatos, faixas e mural</p>
             </div>
           </div>
 
@@ -253,11 +260,10 @@ export default function AdminPage() {
             onClick={handleLogout}
             className="px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 text-xs font-bold transition flex items-center gap-1.5"
           >
-            <LogOut className="h-3.5 w-3.5" /> Sair
+            <LogOut className="h-3.5 w-3.5" /> Terminar Sessão
           </button>
         </div>
 
-        {/* Abas de Navegação */}
         <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-6 overflow-x-auto">
           {[
             { id: "debates", label: "Duelos & Consultas", icon: Flame },
@@ -285,22 +291,22 @@ export default function AdminPage() {
           })}
         </div>
 
-        {/* ABA 1: DUELOS E DEBATES */}
+        {/* ABA 1: DUELOS */}
         {activeTab === "debates" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="rounded-2xl border border-white/10 bg-slate-900 p-5">
               <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                <PlusCircle className="h-4 w-4 text-emerald-400" /> Criar Novo Duelo Grátis
+                <PlusCircle className="h-4 w-4 text-emerald-400" /> Criar Novo Duelo
               </h2>
-              <p className="text-xs text-slate-400 mb-4">Publica no site sem precisar pagar R$ 10 via Pix.</p>
+              <p className="text-xs text-slate-400 mb-4">Publicação direta sem necessidade de pagamento.</p>
 
               <form onSubmit={handleCreateDebateAdmin} className="flex flex-col gap-3">
                 <div>
-                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Tema / Pergunta</label>
+                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Tema / Questão</label>
                   <input
                     type="text"
                     required
-                    placeholder="Ex: Privatização do metrô deve avançar?"
+                    placeholder="Ex: Privatização do metro deve avançar?"
                     value={debateTitle}
                     onChange={(e) => setDebateTitle(e.target.value)}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyan-500"
@@ -327,13 +333,13 @@ export default function AdminPage() {
                   type="submit"
                   className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition shadow mt-2"
                 >
-                  Publicar Duelo Agora
+                  Publicar Duelo
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-slate-900 p-5">
-              <h2 className="text-sm font-bold text-white mb-4">Duelos Ativos no Site ({debates.length})</h2>
+              <h2 className="text-sm font-bold text-white mb-4">Duelos Existentes ({debates.length})</h2>
               <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
                 {debates.map((d) => (
                   <div
@@ -365,18 +371,18 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ABA 2: CANDIDATOS E CARGOS */}
+        {/* ABA 2: CANDIDATOS */}
         {activeTab === "candidates" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="rounded-2xl border border-white/10 bg-slate-900 p-5">
               <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                <UserPlus className="h-4 w-4 text-cyan-400" /> Adicionar Candidato / Cargo
+                <UserPlus className="h-4 w-4 text-cyan-400" /> Adicionar Candidato
               </h2>
-              <p className="text-xs text-slate-400 mb-4">Crie novos nomes para a disputa popular.</p>
+              <p className="text-xs text-slate-400 mb-4">Criar novos nomes na listagem geral.</p>
 
               <form onSubmit={handleCreateCandidate} className="flex flex-col gap-3">
                 <div>
-                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Nome Completo / Urna</label>
+                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Nome</label>
                   <input
                     type="text"
                     required
@@ -430,13 +436,13 @@ export default function AdminPage() {
                   type="submit"
                   className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs transition shadow mt-2"
                 >
-                  Salvar Candidato
+                  Guardar Candidato
                 </button>
               </form>
             </div>
 
             <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-slate-900 p-5">
-              <h2 className="text-sm font-bold text-white mb-4">Candidatos Cadastrados ({candidates.length})</h2>
+              <h2 className="text-sm font-bold text-white mb-4">Candidatos Registados ({candidates.length})</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-1">
                 {candidates.map((c) => (
                   <div
@@ -466,14 +472,14 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ABA 3: BANNERS DE 40 DIAS */}
+        {/* ABA 3: BANNERS COM UPLOAD DIRETO */}
         {activeTab === "banners" && (
           <div className="rounded-2xl border border-white/10 bg-slate-900 p-5 max-w-xl mx-auto">
             <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <Megaphone className="h-4 w-4 text-amber-400" /> Ativar Banner de 40 Dias Manualmente
+              <Megaphone className="h-4 w-4 text-amber-400" /> Ativar Banner de 40 Dias
             </h2>
             <p className="text-xs text-slate-400 mb-4">
-              Coloque qualquer banner no topo do site sem passar pelo pagamento Pix de R$ 1.000.
+              Carregue a imagem diretamente do dispositivo para publicar no topo do portal.
             </p>
 
             <form onSubmit={handleSaveBanner} className="flex flex-col gap-3">
@@ -481,7 +487,7 @@ export default function AdminPage() {
                 <label className="block text-[11px] text-slate-300 font-medium mb-1">Título do Anunciante</label>
                 <input
                   type="text"
-                  placeholder="Ex: Minha Empresa / Campanha"
+                  placeholder="Ex: Campanha ou Marca"
                   value={bannerTitle}
                   onChange={(e) => setBannerTitle(e.target.value)}
                   className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none"
@@ -489,10 +495,10 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] text-slate-300 font-medium mb-1">Link de Destino</label>
+                <label className="block text-[11px] text-slate-300 font-medium mb-1">Ligação de Destino</label>
                 <input
                   type="text"
-                  placeholder="https://wa.me/... ou https://seusite.com"
+                  placeholder="https://..."
                   value={bannerUrl}
                   onChange={(e) => setBannerUrl(e.target.value)}
                   className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none"
@@ -500,15 +506,18 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] text-slate-300 font-medium mb-1">URL da Imagem do Banner</label>
+                <label className="block text-[11px] text-slate-300 font-medium mb-1">Ficheiro de Imagem</label>
                 <input
-                  type="text"
-                  required
-                  placeholder="Cole o link da imagem (ou data URL)..."
-                  value={bannerImg}
-                  onChange={(e) => setBannerImg(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500 cursor-pointer bg-slate-950 border border-white/10 rounded-lg p-2"
                 />
+                {bannerImg && (
+                  <div className="relative w-full h-28 rounded-lg overflow-hidden border border-white/10 mt-2 bg-slate-950">
+                    <img src={bannerImg} alt="Pré-visualização" className="w-full h-full object-cover" />
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2 mt-2">
@@ -523,17 +532,17 @@ export default function AdminPage() {
                   onClick={handleRemoveBanner}
                   className="px-3 py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold rounded-lg text-xs transition border border-rose-500/30"
                 >
-                  Desativar Banner
+                  Desativar
                 </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* ABA 4: MURAL E COMENTÁRIOS */}
+        {/* ABA 4: MURAL */}
         {activeTab === "comments" && (
           <div className="rounded-2xl border border-white/10 bg-slate-900 p-5">
-            <h2 className="text-sm font-bold text-white mb-4">Moderação de Comentários do Mural ({comments.length})</h2>
+            <h2 className="text-sm font-bold text-white mb-4">Moderação do Mural ({comments.length})</h2>
             <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto pr-1">
               {comments.map((c) => (
                 <div
@@ -552,7 +561,7 @@ export default function AdminPage() {
                     type="button"
                     onClick={() => handleDeleteComment(c.id)}
                     className="p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition shrink-0"
-                    title="Excluir Comentário"
+                    title="Remover Comentário"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -565,8 +574,3 @@ export default function AdminPage() {
     </main>
   )
 }
-
-
-
-
-
