@@ -3,69 +3,49 @@ import fs from "fs";
 import path from "path";
 
 export const dynamic = "force-dynamic";
-
 const filePath = path.join(process.cwd(), "src", "lib", "duels-data.json");
 
-function readDuels(): any[] {
+function getDuels() {
   try {
     if (fs.existsSync(filePath)) {
-      const raw = fs.readFileSync(filePath, "utf8");
-      const data = JSON.parse(raw);
-      if (Array.isArray(data)) return data;
+      return JSON.parse(fs.readFileSync(filePath, "utf8"));
     }
   } catch {}
   return [];
 }
 
-function writeDuels(data: any[]) {
+function saveDuels(data: any[]) {
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
   } catch {}
 }
 
 export async function GET() {
-  return NextResponse.json(readDuels());
+  return NextResponse.json(getDuels());
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let current = readDuels();
+    let duels = getDuels();
 
-    // 1. Atualização mestre de votos por ID ou correspondência de título
     if (body.action === "update_votes") {
-      let found = false;
-      current = current.map((d: any) => {
-        if (d.id === body.duelId || (body.duelId && String(d.title).toLowerCase().includes(String(body.duelId).toLowerCase()))) {
-          found = true;
+      duels = duels.map((d: any) => {
+        if (d.id === body.duelId || d.title.toLowerCase().includes(String(body.duelId).toLowerCase())) {
           return {
             ...d,
-            votesYes: Number(body.votesYes) || 0,
-            votesNo: Number(body.votesNo) || 0
+            votesYes: Number(body.votesYes),
+            votesNo: Number(body.votesNo)
           };
         }
         return d;
       });
-
-      // Se não encontrou por ID, cria ou sincroniza o registro
-      if (!found && body.duelId) {
-        current.push({
-          id: body.duelId,
-          category: "GERAL",
-          title: body.title || body.duelId,
-          votesYes: Number(body.votesYes) || 0,
-          votesNo: Number(body.votesNo) || 0,
-          active: true
-        });
-      }
-
-      writeDuels(current);
-      return NextResponse.json({ success: true, duels: current });
+      saveDuels(duels);
+      return NextResponse.json({ success: true, duels });
     }
 
-    // 2. Criação de nova pauta com votos configurados
     if (body.action === "create") {
-      const newEntry = {
+      const newD = {
         id: "duel-" + Date.now(),
         category: body.category || "GERAL",
         title: body.title,
@@ -73,19 +53,18 @@ export async function POST(req: Request) {
         votesNo: Number(body.votesNo) || 0,
         active: true
       };
-      current = [newEntry, ...current];
-      writeDuels(current);
-      return NextResponse.json({ success: true, duel: newEntry, duels: current });
+      duels = [newD, ...duels];
+      saveDuels(duels);
+      return NextResponse.json({ success: true, duel: newD, duels });
     }
 
-    // 3. Exclusão de duelo
     if (body.action === "delete") {
-      current = current.filter((d: any) => d.id !== body.duelId);
-      writeDuels(current);
-      return NextResponse.json({ success: true, duels: current });
+      duels = duels.filter((d: any) => d.id !== body.duelId);
+      saveDuels(duels);
+      return NextResponse.json({ success: true, duels });
     }
 
-    return NextResponse.json({ success: false });
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }

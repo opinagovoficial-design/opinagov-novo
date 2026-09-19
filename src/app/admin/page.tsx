@@ -454,7 +454,53 @@ export default function AdminPage() {
         {activeTab === "debates" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="rounded-2xl border border-white/10 bg-slate-900 p-5">
-              <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+              
+        {/* PAINEL MESTRE DE VOTOS DE DEBATES */}
+        <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 my-4">
+          <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+            ⚡ Controlo Rápido de Votos (Todos os Duelos)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+            <input 
+              id="master-duel-id" 
+              placeholder="Nome ou ID (ex: Alexandre)" 
+              className="bg-slate-950 border border-slate-700 rounded px-3 py-2 text-white" 
+            />
+            <input 
+              id="master-duel-sim" 
+              type="number" 
+              placeholder="Qtd Votos SIM" 
+              className="bg-slate-950 border border-emerald-500/40 rounded px-3 py-2 text-emerald-400 font-bold" 
+            />
+            <input 
+              id="master-duel-nao" 
+              type="number" 
+              placeholder="Qtd Votos NÃO" 
+              className="bg-slate-950 border border-rose-500/40 rounded px-3 py-2 text-rose-400 font-bold" 
+            />
+            <button 
+              type="button" 
+              onClick={async () => {
+                const id = (document.getElementById("master-duel-id") as HTMLInputElement)?.value;
+                const sim = (document.getElementById("master-duel-sim") as HTMLInputElement)?.value;
+                const nao = (document.getElementById("master-duel-nao") as HTMLInputElement)?.value;
+                if (!id) { alert("Insira o nome ou ID da pauta"); return; }
+                await fetch("/api/duels", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ action: "update_votes", duelId: id, votesYes: Number(sim) || 0, votesNo: Number(nao) || 0 })
+                });
+                alert("Votos atualizados com sucesso!");
+                window.location.reload();
+              }}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded px-4 py-2 transition-all"
+            >
+              Aplicar no Site
+            </button>
+          </div>
+        </div>
+
+<h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                 <PlusCircle className="h-4 w-4 text-emerald-400" /> Criar Novo Duelo
               </h2>
               <p className="text-xs text-slate-400 mb-4">Publicação direta sem necessidade de pagamento.</p>
