@@ -503,70 +503,127 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ABA 3: BANNERS COM UPLOAD DIRETO */}
+        {/* ABA 3: BANNERS COM CONTROLE COMPLETO */}
         {activeTab === "banners" && (
-          <div className="rounded-2xl border border-white/10 bg-slate-900 p-5 max-w-xl mx-auto">
-            <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <Megaphone className="h-4 w-4 text-amber-400" /> Ativar Banner de 40 Dias
-            </h2>
-            <p className="text-xs text-slate-400 mb-4">
-              Carregue a imagem diretamente do dispositivo para publicar no topo do portal.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-white/10 bg-slate-900 p-5">
+              <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                <Megaphone className="h-4 w-4 text-amber-400" /> Cadastrar Novo Anúncio
+              </h2>
+              <p className="text-xs text-slate-400 mb-4">
+                Ative um banner manualmente sem custo ou adicione direto na rotação.
+              </p>
 
-            <form onSubmit={handleSaveBanner} className="flex flex-col gap-3">
-              <div>
-                <label className="block text-[11px] text-slate-300 font-medium mb-1">Título do Anunciante</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Campanha ou Marca"
-                  value={bannerTitle}
-                  onChange={(e) => setBannerTitle(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none"
-                />
-              </div>
+              <form onSubmit={handleSaveBanner} className="flex flex-col gap-3">
+                <div>
+                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Título do Anunciante</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Minha Empresa / Campanha"
+                    value={bannerTitle}
+                    onChange={(e) => setBannerTitle(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-amber-500"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[11px] text-slate-300 font-medium mb-1">Ligação de Destino</label>
-                <input
-                  type="text"
-                  placeholder="https://..."
-                  value={bannerUrl}
-                  onChange={(e) => setBannerUrl(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none"
-                />
-              </div>
+                <div>
+                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Link de Destino</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="https://..."
+                    value={bannerUrl}
+                    onChange={(e) => setBannerUrl(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-amber-500"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[11px] text-slate-300 font-medium mb-1">Ficheiro de Imagem</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500 cursor-pointer bg-slate-950 border border-white/10 rounded-lg p-2"
-                />
-                {bannerImg && (
-                  <div className="relative w-full h-28 rounded-lg overflow-hidden border border-white/10 mt-2 bg-slate-950">
-                    <img src={bannerImg} alt="Pré-visualização" className="w-full h-full object-cover" />
-                  </div>
+                <div>
+                  <label className="block text-[11px] text-slate-300 font-medium mb-1">Upload da Imagem</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer bg-slate-950 border border-white/10 rounded-lg p-2"
+                  />
+                  {bannerImg && (
+                    <div className="relative w-full h-24 rounded-lg overflow-hidden border border-white/10 mt-2 bg-slate-950">
+                      <img src={bannerImg} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs transition shadow mt-2"
+                >
+                  Adicionar ao Carrossel (40 Dias)
+                </button>
+              </form>
+            </div>
+
+            <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-slate-900 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-sm font-bold text-white">Anúncios em Rotação ({bannersList.length})</h2>
+                  <p className="text-[11px] text-slate-400">Controle todos os banners ativos. Exclua quando quiser com um clique.</p>
+                </div>
+                {bannersList.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveBanner}
+                    className="px-2.5 py-1 text-[11px] rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 transition"
+                  >
+                    Desativar Todos
+                  </button>
                 )}
               </div>
 
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs transition shadow"
-                >
-                  Ativar Banner por 40 Dias
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRemoveBanner}
-                  className="px-3 py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold rounded-lg text-xs transition border border-rose-500/30"
-                >
-                  Desativar
-                </button>
-              </div>
-            </form>
+              {bannersList.length === 0 ? (
+                <div className="p-8 text-center border border-dashed border-white/10 rounded-xl">
+                  <p className="text-xs text-slate-500">Nenhum anúncio ativo no carrossel no momento.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+                  {bannersList.map((b: any, index: number) => (
+                    <div
+                      key={b.id || index}
+                      className="flex items-center justify-between gap-4 p-3 rounded-xl bg-slate-950 border border-white/5 hover:border-white/10 transition"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-16 h-12 rounded-lg bg-slate-900 border border-white/10 overflow-hidden shrink-0">
+                          <img src={b.imageUrl} alt={b.title} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-white truncate">{b.title}</h4>
+                          <a
+                            href={b.targetUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-cyan-400 hover:underline truncate block"
+                          >
+                            {b.targetUrl}
+                          </a>
+                          <span className="text-[10px] text-amber-400 font-semibold">
+                            Ativo por 40 dias
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSingleBanner(b.id || index)}
+                        className="p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition shrink-0"
+                        title="Excluir este anúncio"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
